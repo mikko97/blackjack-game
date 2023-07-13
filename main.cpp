@@ -1,5 +1,5 @@
 #include "mainwindow.hh"
-#include "card.hh"
+#include "deck.hh"
 
 #include <QApplication>
 #include <iostream>
@@ -9,10 +9,19 @@ int main(int argc, char *argv[])
     //QApplication a(argc, argv);
     //MainWindow w;
 
-    Card* card = new Card(5, "Hearts");
-    std::cout << "Value of card is: " << card->get_value() << std::endl;
-    std::cout << "Suit of card is: " << card->get_suit() << std::endl;
-    delete card;
+    Deck* deck = new Deck();
+    deck->shuffle();
+
+    for(int i = 1; i <= 55; i++) {
+        Card* card = deck->draw_card();
+        if (card==nullptr) {
+            std::cout << "EMPTY DECK" << std::endl;
+        }
+        else {
+            std::cout << "Suit: " << card->get_suit() << ", " << "Value: " << card->get_value();
+            std::cout << std::endl;
+        }
+    }
 
     return 0;
 

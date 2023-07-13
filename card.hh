@@ -11,7 +11,7 @@ public:
      * @param value - value of the card
      * @param suit - suit of the card
      */
-    Card(int value, std::string suit);
+    Card(int value, int suit);
 
     /**
      * @brief Card destructor
@@ -28,13 +28,13 @@ public:
      * @brief get_suit
      * @return suit of the card
      */
-    std::string get_suit();
+    int get_suit();
 
 
 
 private:
     int value_;
-    std::string suit_;
+    int suit_;
 };
 
 #endif // CARD_HH
