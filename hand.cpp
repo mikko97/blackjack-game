@@ -5,10 +5,8 @@ Hand::Hand()
 {
 }
 
-Hand::~Hand() {
-    for(auto card : hand_) {
-        delete card;
-    }
+Hand::~Hand()
+{
 }
 
 void Hand::initial_draw(Deck& deck) {

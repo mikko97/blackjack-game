@@ -18,7 +18,8 @@ void Deck::new_deck() {
     }
 }
 
-Deck::~Deck() {
+Deck::~Deck()
+{
     for(auto card : deck_) {
         delete card;
     }
@@ -30,7 +31,7 @@ void Deck::shuffle() {
     }
 }
 
-Card* Deck::draw_card() {
+Card *Deck::draw_card() {
     if (deck_.empty()) {
         new_deck();
     }
