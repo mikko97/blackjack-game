@@ -6,7 +6,6 @@ Deck::Deck()
 }
 
 void Deck::new_deck() {
-
     for (auto card : deck_) {
         delete card;
     }
@@ -26,14 +25,12 @@ Deck::~Deck() {
 }
 
 void Deck::shuffle() {
-
     for(int i = 0; i < deck_size_; i++) {
         std::swap(deck_[i], deck_[rand()%deck_size_]);
     }
 }
 
 Card* Deck::draw_card() {
-
     if (deck_.empty()) {
         new_deck();
     }

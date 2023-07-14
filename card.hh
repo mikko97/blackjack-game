@@ -6,6 +6,7 @@
 class Card
 {
 public:
+
     /**
      * @brief Card constructor
      * @param value - value of the card
@@ -22,13 +23,19 @@ public:
      * @brief get_value
      * @return value of the card
      */
-    int get_value();
+    int get_value() const;
 
     /**
      * @brief get_suit
      * @return suit of the card
      */
-    int get_suit();
+    int get_suit() const;
+
+    /**
+     * @brief get_points
+     * @return Points of the card
+     */
+    int get_points() const;
 
 
 
