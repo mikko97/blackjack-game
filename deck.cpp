@@ -6,38 +6,35 @@ Deck::Deck()
 }
 
 void Deck::new_deck() {
-    for (auto card : deck_) {
-        delete card;
-    }
     deck_.clear();
-
     for (int suit = 1; suit <= 4; suit++) {
         for (int value = 1; value <= 13; value++) {
-            deck_.push_back(new Card(value, suit));
+            deck_.push_back(std::make_unique<Card>(value, suit));
         }
     }
+    shuffle();
 }
 
 Deck::~Deck()
 {
-    for(auto card : deck_) {
-        delete card;
-    }
 }
 
 void Deck::shuffle() {
-    for(int i = 0; i < deck_size_; i++) {
-        std::swap(deck_[i], deck_[rand()%deck_size_]);
-    }
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(deck_.begin(), deck_.end(), g);
 }
 
-Card *Deck::draw_card() {
+std::unique_ptr<Card> Deck::draw_card() {
     if (deck_.empty()) {
         new_deck();
     }
 
-    Card* card = deck_.back();
+    std::unique_ptr<Card> card = std::move(deck_.back());
     deck_.pop_back();
     return card;
 }
 
+std::vector<std::unique_ptr<Card>>& Deck::get_deck() {
+    return deck_;
+}

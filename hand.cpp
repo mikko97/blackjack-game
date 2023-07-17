@@ -1,5 +1,4 @@
 #include "hand.hh"
-#include "deck.hh"
 
 Hand::Hand()
 {
@@ -9,27 +8,26 @@ Hand::~Hand()
 {
 }
 
-void Hand::initial_draw(Deck& deck) {
-    Card* first_card = deck.draw_card();
-    Card* second_card = deck.draw_card();
-    hand_.push_back(first_card);
-    hand_.push_back(second_card);
+void Hand::initial_draw(std::vector<std::unique_ptr<Card>>& deck) {
+    draw_new_card(deck);
+    draw_new_card(deck);
 }
 
-void Hand::draw_new_card(Deck& deck) {
-    Card* card = deck.draw_card();
-    hand_.push_back(card);
+void Hand::draw_new_card(std::vector<std::unique_ptr<Card>>& deck) {
+    std::unique_ptr<Card> card = std::move(deck.back());
+    deck.pop_back();
+    hand_.push_back(std::move(card));
 }
 
-const std::vector<Card*>& Hand::get_hand() {
+const std::vector<std::unique_ptr<Card>>& Hand::get_hand() const {
     return hand_;
 }
 
-int Hand::calculate_points() {
+int Hand::calculate_points() const {
     int total_points  = 0;
     int ace_count = 0;
 
-    for (Card* card : hand_) {
+    for (const auto& card : hand_) {
         int card_points = card->get_points();
         total_points += card_points;
         if (card_points == 1) {
