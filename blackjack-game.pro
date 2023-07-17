@@ -14,14 +14,16 @@ SOURCES += \
     deck.cpp \
     hand.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    player.cpp
 
 HEADERS += \
     card.hh \
     dealer.hh \
     deck.hh \
     hand.hh \
-    mainwindow.hh
+    mainwindow.hh \
+    player.hh
 
 FORMS += \
     mainwindow.ui

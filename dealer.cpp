@@ -1,4 +1,5 @@
 #include "dealer.hh"
+
 Dealer::Dealer()
 {
     hand_ = new Hand();
