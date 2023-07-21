@@ -12,6 +12,7 @@ SOURCES += \
     card.cpp \
     dealer.cpp \
     deck.cpp \
+    game.cpp \
     hand.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -21,6 +22,7 @@ HEADERS += \
     card.hh \
     dealer.hh \
     deck.hh \
+    game.hh \
     hand.hh \
     mainwindow.hh \
     player.hh
@@ -32,3 +34,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    resources.qrc

@@ -11,7 +11,7 @@ public:
     /**
      * @brief Player constructor
      */
-    Player();
+    Player(Deck& deck);
 
     /**
      * @brief Player destructor
@@ -19,26 +19,31 @@ public:
     ~Player();
 
     /**
-     * @brief initial_draw
+     * @brief Initial draw of the first 2 cards
      */
-    void initial_draw(std::vector<std::unique_ptr<Card>>& deck);
+    void initial_draw();
 
     /**
-     * @brief draw_new_card
+     * @brief Draw 1 additional card
      */
-    void draw_new_card(std::vector<std::unique_ptr<Card>>& deck);
+    void draw_new_card();
 
     /**
-     * @brief get_hand
-     * @return The hand
+     * @brief Get the hand which holds the current cards dealt
+     * @return The hand of the player
      */
     const std::vector<std::unique_ptr<Card>>& get_hand() const;
 
     /**
-     * @brief get_points
-     * @return The points of the hand
+     * @brief Get the points of the cards in hand
+     * @return The points
      */
     int get_points() const;
+
+    /**
+     * @brief Empty hand
+     */
+    void empty_hand();
 
 private:
     std::unique_ptr<Hand> hand_;

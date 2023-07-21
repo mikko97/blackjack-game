@@ -2,7 +2,6 @@
 #define DEALER_HH
 
 #include <hand.hh>
-#include <deck.hh>
 
 #include <iostream>
 
@@ -13,7 +12,7 @@ public:
     /**
      * @brief Dealer constructor
      */
-    Dealer();
+    Dealer(Deck& deck);
 
     /**
      * @brief Dealer destructor
@@ -21,26 +20,42 @@ public:
     ~Dealer();
 
     /**
-     * @brief initial_draw
+     * @brief Initial draw of the first 2 cards
      */
-    void initial_draw(std::vector<std::unique_ptr<Card>>& deck);
+    void initial_draw();
 
     /**
-     * @brief draw_new_card
+     * @brief Draw 1 additional card
      */
-    void draw_new_card(std::vector<std::unique_ptr<Card>>& deck);
+    void draw_new_card();
 
     /**
-     * @brief make_move
-     * @return The points of the hand
+     * @brief Make the move after the initial draw of cards
+     * @return The points of the hand after the move
      */
-    int make_move(std::vector<std::unique_ptr<Card>>& deck);
+    void make_move();
 
     /**
-     * @brief get_hand
-     * @return The hand
+     * @brief Get the hand which holds the current cards dealt
+     * @return The hand of the dealer
      */
     const std::vector<std::unique_ptr<Card>>& get_hand() const;
+
+    /**
+     * @brief Get the points of the cards in hand
+     * @return The points
+     */
+    int get_points() const;
+
+    /**
+     * @brief Empty the hand
+     */
+    void empty_hand();
+
+    /**
+     * @brief Reset the deck
+     */
+    void reset_deck();
 
 private:
     std::unique_ptr<Hand> hand_;

@@ -1,15 +1,20 @@
 #include "player.hh"
 
-Player::Player() : hand_(std::make_unique<Hand>())
+Player::Player(Deck& deck) : hand_(std::make_unique<Hand>(deck))
+{
+
+}
+
+Player::~Player()
 {
 }
 
-void Player::initial_draw(std::vector<std::unique_ptr<Card>>& deck) {
-    hand_->initial_draw(deck);
+void Player::initial_draw() {
+    hand_->initial_draw();
 }
 
-void Player::draw_new_card(std::vector<std::unique_ptr<Card>>& deck) {
-    hand_->draw_new_card(deck);
+void Player::draw_new_card() {
+    hand_->draw_new_card();
 }
 
 const std::vector<std::unique_ptr<Card>>& Player::get_hand() const {
@@ -18,4 +23,8 @@ const std::vector<std::unique_ptr<Card>>& Player::get_hand() const {
 
 int Player::get_points() const {
     return hand_->calculate_points();
+}
+
+void Player::empty_hand() {
+    hand_->empty_hand();
 }

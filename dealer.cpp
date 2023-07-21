@@ -1,6 +1,6 @@
 #include "dealer.hh"
 
-Dealer::Dealer() : hand_(std::make_unique<Hand>())
+Dealer::Dealer(Deck& deck) : hand_(std::make_unique<Hand>(deck))
 {
 
 }
@@ -9,22 +9,28 @@ Dealer::~Dealer()
 {
 }
 
-void Dealer::initial_draw(std::vector<std::unique_ptr<Card>>& deck) {
-    hand_->initial_draw(deck);
+void Dealer::initial_draw() {
+    hand_->initial_draw();
 }
 
-void Dealer::draw_new_card(std::vector<std::unique_ptr<Card>>& deck) {
-    hand_->draw_new_card(deck);
+void Dealer::draw_new_card() {
+    hand_->draw_new_card();
 }
 
-int Dealer::make_move(std::vector<std::unique_ptr<Card>>& deck) {
+void Dealer::make_move() {
     while(hand_->calculate_points()<17) {
-        draw_new_card(deck);
+        draw_new_card();
     }
-
-    return hand_->calculate_points();
 }
 
 const std::vector<std::unique_ptr<Card>>& Dealer::get_hand() const {
     return hand_->get_hand();
+}
+
+int Dealer::get_points() const {
+    return hand_->calculate_points();
+}
+
+void Dealer::empty_hand() {
+    hand_->empty_hand();
 }

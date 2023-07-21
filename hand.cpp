@@ -1,6 +1,7 @@
 #include "hand.hh"
 
-Hand::Hand()
+Hand::Hand(Deck& deck):
+    deck_(deck)
 {
 }
 
@@ -8,14 +9,13 @@ Hand::~Hand()
 {
 }
 
-void Hand::initial_draw(std::vector<std::unique_ptr<Card>>& deck) {
-    draw_new_card(deck);
-    draw_new_card(deck);
+void Hand::initial_draw() {
+    draw_new_card();
+    draw_new_card();
 }
 
-void Hand::draw_new_card(std::vector<std::unique_ptr<Card>>& deck) {
-    std::unique_ptr<Card> card = std::move(deck.back());
-    deck.pop_back();
+void Hand::draw_new_card() {
+    std::unique_ptr<Card> card = deck_.draw_card();
     hand_.push_back(std::move(card));
 }
 
@@ -30,14 +30,20 @@ int Hand::calculate_points() const {
     for (const auto& card : hand_) {
         int card_points = card->get_points();
         total_points += card_points;
-        if (card_points == 1) {
+        if (card_points == 11) {
             ace_count++;
         }
     }
 
-    if (ace_count > 0 and total_points + 10 <= 21) {
-        total_points += 10;
+    if (ace_count > 0 and total_points > 21) {
+        total_points -= 10;
     }
 
     return total_points;
 }
+
+void Hand::empty_hand() {
+    hand_.clear();
+}
+
+

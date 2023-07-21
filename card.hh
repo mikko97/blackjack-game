@@ -20,19 +20,19 @@ public:
     ~Card();
 
     /**
-     * @brief get_value
+     * @brief Get the value of the card
      * @return value of the card
      */
     int get_value() const;
 
     /**
-     * @brief get_suit
+     * @brief Get the suit of the card
      * @return suit of the card
      */
     int get_suit() const;
 
     /**
-     * @brief get_points
+     * @brief Get the points of the card
      * @return Points of the card
      */
     int get_points() const;

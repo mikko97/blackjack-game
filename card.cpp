@@ -19,7 +19,7 @@ int Card::get_suit() const {
 
 int Card::get_points() const {
     if (value_ == 1) {
-        return 10;
+        return 11;
     } else if (value_ >= 2 and value_ <= 10) {
         return value_;
     } else {

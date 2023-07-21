@@ -7,9 +7,11 @@ Deck::Deck()
 
 void Deck::new_deck() {
     deck_.clear();
-    for (int suit = 1; suit <= 4; suit++) {
-        for (int value = 1; value <= 13; value++) {
-            deck_.push_back(std::make_unique<Card>(value, suit));
+    for(int i=0; i<=4; i++) {
+        for (int suit = 1; suit <= 4; suit++) {
+            for (int value = 1; value <= 13; value++) {
+                deck_.push_back(std::make_unique<Card>(value, suit));
+            }
         }
     }
     shuffle();

@@ -30,8 +30,8 @@ public:
     void shuffle();
 
     /**
-     * @brief draw_card
-     * @return A card from the deck
+     * @brief Draw a card from the deck
+     * @return The card
      */
     std::unique_ptr<Card> draw_card();
 
@@ -41,8 +41,8 @@ public:
     void new_deck();
 
     /**
-     * @brief Get the deck vector
-     * @return Reference to the deck vector
+     * @brief Get the deck of cards
+     * @return Reference to the vector containing the cards
      */
     std::vector<std::unique_ptr<Card>>& get_deck();
 
