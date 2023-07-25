@@ -1,4 +1,5 @@
 #include "deck.hh"
+#include <chrono>
 
 Deck::Deck()
 {
@@ -22,8 +23,8 @@ Deck::~Deck()
 }
 
 void Deck::shuffle() {
-    std::random_device rd;
-    std::mt19937 g(rd());
+    auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    std::mt19937 g(static_cast<unsigned int>(seed));
     std::shuffle(deck_.begin(), deck_.end(), g);
 }
 

@@ -25,6 +25,10 @@ int Player::get_points() const {
     return hand_->calculate_points();
 }
 
+int Player::get_secondary_points() const {
+    return hand_->calculate_secondary_points();
+}
+
 void Player::empty_hand() {
     hand_->empty_hand();
 }

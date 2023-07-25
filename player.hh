@@ -41,6 +41,12 @@ public:
     int get_points() const;
 
     /**
+     * @brief Get the points of the cards in hand
+     * @return The points
+     */
+    int get_secondary_points() const;
+
+    /**
      * @brief Empty hand
      */
     void empty_hand();

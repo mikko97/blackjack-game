@@ -6,6 +6,7 @@
 #include <QMainWindow>
 #include <QLabel>
 #include <QPushButton>
+#include <QTextBrowser>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -49,17 +50,19 @@ private slots:
 private:
 
     void set_up_UI();
-    void update_UI();
+    void update_UI(bool first_round);
     //void show_result(const QString& result);
 
     Ui::MainWindow *ui;
-    QList<QPushButton*> buttons_;
     QPushButton* hit_button_;
     QPushButton* stay_button_;
     QPushButton* reset_button_;
+    QTextBrowser* textbox1_;
     QPushButton* new_round_button_;
     QList<QLabel*> player_card_holders_;
     QList<QLabel*> dealer_card_holders_;
+    bool player_over_ = false;
+    bool dealer_over_ = false;
 
     Game game_;
 

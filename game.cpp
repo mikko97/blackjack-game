@@ -13,9 +13,12 @@ Game::~Game()
 
 void Game::new_round() {
     dealer_->empty_hand();
-    player_->empty_hand();
     dealer_won_ = false;
-    player_won_ = false;
+    dealer_over = false;
+
+    player_->empty_hand();
+    player_won_ = false; 
+    player_over = false;
 
     initial_draw();
 }
@@ -27,18 +30,31 @@ void Game::initial_draw() {
 
 void Game::dealer_turn() {
     dealer_->make_move();
+    if(dealer_->get_points()>21) {
+        dealer_over = true;
+    }
     determine_winner();
 }
 
 void Game::player_hit() {
     player_->draw_new_card();
+    if(player_->get_points()>21) {
+        player_over = true;
+        determine_winner();
+    }
 }
 
 void Game::determine_winner() {
-    if(dealer_->get_points()>=player_->get_points()) {
+    if(player_over==true) {
         dealer_won_ = true;
     }
-    else {
+    else if(player_over==false and dealer_over==false and dealer_->get_points()>=player_->get_points()) {
+        dealer_won_ = true;
+    }
+    else if(player_over==false and dealer_over==false and player_->get_points()>dealer_->get_points()) {
+        player_won_ = true;
+    }
+    else if(player_over==false and dealer_over==true){
         player_won_ = true;
     }
 }
@@ -55,6 +71,10 @@ int Game::get_player_points() {
     return player_->get_points();
 }
 
+int Game::get_player_secondary_points() {
+    return player_->get_secondary_points();
+}
+
 int Game::get_dealer_points() {
     return dealer_->get_points();
 }
@@ -63,8 +83,10 @@ std::string Game::get_winner() {
     if(dealer_won_==true) {
         return "Dealer";
     }
-
-    return "Player";
+    else if(player_won_==true) {
+        return "Player";
+    }
+    return "Ongoing";
 }
 
 void Game::reset_game() {

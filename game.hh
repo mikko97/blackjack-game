@@ -39,6 +39,11 @@ public:
     int get_player_points();
 
     /**
+     * @brief get_player_points
+     */
+    int get_player_secondary_points();
+
+    /**
      * @brief get_dealer_points
      */
     int get_dealer_points();
@@ -70,6 +75,8 @@ private:
     std::unique_ptr<Dealer> dealer_;
     bool player_won_ = false;
     bool dealer_won_ = false;
+    bool player_over = false;
+    bool dealer_over = false;
 
     /**
      * @brief Dealers turn to play

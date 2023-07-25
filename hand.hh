@@ -42,6 +42,12 @@ public:
     int calculate_points() const;
 
     /**
+     * @brief Calculate secondary points relating to ace in hand
+     * @return The points
+     */
+    int calculate_secondary_points() const;
+
+    /**
      * @brief Empty the hand
      */
     void empty_hand();
@@ -49,7 +55,6 @@ public:
 private:
     Deck& deck_;
     std::vector<std::unique_ptr<Card>> hand_;
-    int points_;
 };
 
 #endif // HAND_HH
