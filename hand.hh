@@ -55,6 +55,8 @@ public:
 private:
     Deck& deck_;
     std::vector<std::unique_ptr<Card>> hand_;
+    static const int BLACKJACK_THRESHOLD = 21;
+    static const int ACE_POINTS = 11;
 };
 
 #endif // HAND_HH

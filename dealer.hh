@@ -59,6 +59,7 @@ public:
 
 private:
     std::unique_ptr<Hand> hand_;
+    static const int DEALER_THRESHOLD = 17;
 };
 
 #endif // DEALER_HH

@@ -30,13 +30,13 @@ int Hand::calculate_points() const{
     for (const auto& card : hand_) {
         int card_points = card->get_points();
         total_points += card_points;
-        if (card_points == 11) {
+        if (card_points == ACE_POINTS) {
             ace_count++;
         }
     }
 
-    if (ace_count > 0 and total_points > 21) {
-        total_points -= 10;
+    if (ace_count > 0 and total_points > BLACKJACK_THRESHOLD) {
+        total_points -= ACE_POINTS-1;
     }
 
     return total_points;
@@ -49,14 +49,15 @@ int Hand::calculate_secondary_points() const {
     for (const auto& card : hand_) {
         int card_points = card->get_points();
         total_points += card_points;
-        if (card_points == 11) {
+        if (card_points == ACE_POINTS) {
             ace_count++;
         }
     }
 
-    if (ace_count > 0 and total_points < 22) {
-        return total_points-10;
+    if (ace_count > 0 and total_points < BLACKJACK_THRESHOLD) {
+        return total_points-ACE_POINTS+1;
     }
+
     return calculate_points();
 }
 

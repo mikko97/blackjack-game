@@ -23,10 +23,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Create the first group of frames (15 frames at the middle and upper side of the screen)
     QHBoxLayout* group1Layout = new QHBoxLayout;
-    for (int i = 0; i < 15; ++i)
+    for (int i = 0; i < NUM_CARD_HOLDERS; ++i)
     {
         QLabel* label = new QLabel(this);
-        label->setFixedSize(200, 300);
+        label->setFixedSize(CARD_HOLDER_WIDTH, CARD_HOLDER_HEIGHT);
         label->setPixmap(QPixmap());
 
         group1Layout->addWidget(label);
@@ -35,10 +35,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Create the second group of frames (15 frames at the middle and lower side of the screen)
     QHBoxLayout* group2Layout = new QHBoxLayout;
-    for (int i = 0; i < 15; ++i)
+    for (int i = 0; i < NUM_CARD_HOLDERS; ++i)
     {
         QLabel* label = new QLabel(this);
-        label->setFixedSize(200, 300);
+        label->setFixedSize(CARD_HOLDER_WIDTH, CARD_HOLDER_HEIGHT);
         label->setPixmap(QPixmap());
 
         group2Layout->addWidget(label);
@@ -51,10 +51,10 @@ MainWindow::MainWindow(QWidget *parent)
     // Add buttons to the button layout
     hit_button_ = new QPushButton("Hit", this);
     hit_button_->setObjectName("Hit");
-    hit_button_->setFixedSize(200, 100);
+    hit_button_->setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT);
     stay_button_ = new QPushButton("Stay", this);
     stay_button_->setObjectName("Stay");
-    stay_button_->setFixedSize(200, 100);
+    stay_button_->setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT);
 
     button_layout1->addWidget(hit_button_);
     button_layout1->addWidget(stay_button_);
@@ -63,10 +63,10 @@ MainWindow::MainWindow(QWidget *parent)
     QHBoxLayout* button_layout2 = new QHBoxLayout;
     new_round_button_ = new QPushButton("New round", this);
     new_round_button_->setObjectName("New round");
-    new_round_button_->setFixedSize(200, 100);
+    new_round_button_->setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT);
     reset_button_ = new QPushButton("Reset game", this);
     reset_button_->setObjectName("Reset game");
-    reset_button_->setFixedSize(200, 100);
+    reset_button_->setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT);
 
     button_layout2->addWidget(new_round_button_);
     button_layout2->addWidget(reset_button_);
@@ -123,7 +123,7 @@ void MainWindow::new_round() {
     hit_button_->setEnabled(true);
     stay_button_->setEnabled(true);
 
-    if(game_.get_player_points()==21) {
+    if(game_.get_player_points()==BLACKJACK_THRESHOLD) {
         update_UI(false);
         dealer_turn();
     }
@@ -140,10 +140,10 @@ void MainWindow::reset_game() {
 void MainWindow::player_hit() {
     game_.player_hit();
     update_UI(true);
-    if(game_.get_player_points()==21) {
+    if(game_.get_player_points()==BLACKJACK_THRESHOLD) {
         dealer_turn();
     }
-    else if(game_.get_player_points()>21) {
+    else if(game_.get_player_points()>BLACKJACK_THRESHOLD) {
         player_over_ = true;
         update_UI(true);
     }
@@ -153,7 +153,7 @@ void MainWindow::dealer_turn() {
     hit_button_->setEnabled(false);
     stay_button_->setEnabled(false);
     game_.dealer_turn();
-    if(game_.get_dealer_points()>21) {
+    if(game_.get_dealer_points()>BLACKJACK_THRESHOLD) {
         dealer_over_ = true;
     }
     update_UI(false);
@@ -164,9 +164,11 @@ void MainWindow::set_up_UI() {
     dealer_over_ = false;
     hit_button_->setEnabled(false);
     stay_button_->setEnabled(false);
+
     textbox1_->setText("Press the 'New round'-button to start the game");
     QFont font("Arial", 22, QFont::Normal);
     textbox1_->setFont(font);
+
     for(auto dealer_card_holder : dealer_card_holders_) {
         dealer_card_holder->setPixmap(QPixmap());
     }
@@ -179,24 +181,22 @@ void MainWindow::update_UI(bool first_round) {
     const std::vector<std::unique_ptr<Card>>& dealer_hand = game_.get_dealer_hand();
     const std::vector<std::unique_ptr<Card>>& player_hand = game_.get_player_hand();
 
-
     int i = 0;
     for (const auto& dealer_card : dealer_hand) {
         if(first_round==true and i==1) {
-            QString card_image_path = QString(":/cards/backside");
-            QPixmap pixmap(card_image_path);
+            QString card_image_path = QString(":/cards/backside.png");
+            QPixmap pixmap = load_pixmap_from_resource(card_image_path);
             dealer_card_holders_.at(i)->setPixmap(pixmap.scaled(dealer_card_holders_.at(0)->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
         }
         else {
             int suit_number = dealer_card->get_suit();
             int value_number = dealer_card->get_value();
             QString card_image_path = QString(":/cards/%1_%2.png").arg(value_number).arg(suit_number);
-            QPixmap pixmap(card_image_path);
+            QPixmap pixmap = load_pixmap_from_resource(card_image_path);
             dealer_card_holders_.at(i)->setPixmap(pixmap.scaled(dealer_card_holders_.at(0)->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
         }
         i++;
     }
-
 
     i = 0;
     for (const auto& player_card : player_hand) {
@@ -204,7 +204,6 @@ void MainWindow::update_UI(bool first_round) {
         int value_number = player_card->get_value();
         QString card_image_path = QString(":/cards/%1_%2.png").arg(value_number).arg(suit_number);
         QPixmap pixmap(card_image_path);
-
         player_card_holders_.at(i)->setPixmap(pixmap.scaled(player_card_holders_.at(0)->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
         i++;
     }
@@ -230,23 +229,56 @@ void MainWindow::update_UI(bool first_round) {
         if(player_secondary_score!=player_score) {
             text += " or " + QString::number(player_secondary_score);
         }
-        text += "\nPress 'Hit' to draw new card. \n";
+        text += "\nPress 'Hit' to draw new card \n";
         text += "Press 'Stay' to stay";
         textbox1_->setText(text);
     }
 
     else if(game_.get_winner()=="Player"){
         QString text = "You won! \n";
-        text += "Your score: " + QString::number(player_score) + "\n";
-        text += "Dealer score: " + QString::number(dealer_score) + "\n";
+        if(game_.get_player_points()==BLACKJACK_THRESHOLD) {
+            text += "You got blackjack!";
+        }
+        else {
+            text += "Your score: " + QString::number(player_score) + "\n";
+            text += "Dealer score: " + QString::number(dealer_score) + "\n";
+        }
         textbox1_->setText(text);
     }
+
     else if(game_.get_winner()=="Dealer") {
         QString text = "Dealer won! \n";
-        text += "Your score: " + QString::number(player_score) + "\n";
-        text += "Dealer score: " + QString::number(dealer_score) + "\n";
+        if(game_.get_dealer_points()==BLACKJACK_THRESHOLD) {
+            text += "Dealer got blackjack!";
+        }
+        else {
+            text += "Your score: " + QString::number(player_score) + "\n";
+            text += "Dealer score: " + QString::number(dealer_score) + "\n";
+        }
         textbox1_->setText(text);
     }
+
+    else if(game_.get_winner()=="Tie") {
+        QString text = "It's a tie! \n";
+        text += "You both got blackjack!";
+        textbox1_->setText(text);
+    }
+}
+
+QPixmap MainWindow::load_pixmap_from_resource(const QString& file_path) {
+    QPixmap pixmap;
+    QFile file(file_path);
+    if (!file.exists()) {
+        qDebug() << "Image file not found: " << file_path;
+        return pixmap; // Return an empty pixmap if the file doesn't exist
+    }
+
+    if (!pixmap.load(file_path)) {
+        qDebug() << "Failed to load image from file: " << file_path;
+        return pixmap; // Return an empty pixmap if the image couldn't be loaded
+    }
+
+    return pixmap;
 }
 
 void MainWindow::play() {

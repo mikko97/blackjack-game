@@ -75,8 +75,12 @@ private:
     std::unique_ptr<Dealer> dealer_;
     bool player_won_ = false;
     bool dealer_won_ = false;
+    bool tie_ = false;
     bool player_over = false;
     bool dealer_over = false;
+    bool round_over_ = false;
+
+    static const int BLACKJACK_THRESHOLD = 21;
 
     /**
      * @brief Dealers turn to play

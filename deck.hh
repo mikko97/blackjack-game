@@ -9,7 +9,6 @@
 #include <random>
 #include <algorithm>
 
-const int DECK_SIZE = 52;
 
 class Deck
 {
@@ -47,7 +46,8 @@ public:
     std::vector<std::unique_ptr<Card>>& get_deck();
 
 private:
-    const int deck_size_ = DECK_SIZE;
+    static const int DECK_SIZE = 52;
+    static const int NUMBER_OF_DECKS = 5;
     std::vector<std::unique_ptr<Card>> deck_;
 };
 

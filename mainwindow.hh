@@ -7,6 +7,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QTextBrowser>
+#include <qfile.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -51,7 +52,7 @@ private:
 
     void set_up_UI();
     void update_UI(bool first_round);
-    //void show_result(const QString& result);
+    QPixmap load_pixmap_from_resource(const QString& file_path);
 
     Ui::MainWindow *ui;
     QPushButton* hit_button_;
@@ -59,10 +60,19 @@ private:
     QPushButton* reset_button_;
     QTextBrowser* textbox1_;
     QPushButton* new_round_button_;
+
     QList<QLabel*> player_card_holders_;
     QList<QLabel*> dealer_card_holders_;
+
     bool player_over_ = false;
     bool dealer_over_ = false;
+
+    static const int NUM_CARD_HOLDERS = 15;
+    static const int CARD_HOLDER_WIDTH = 200;
+    static const int CARD_HOLDER_HEIGHT = 300;
+    static const int BUTTON_WIDTH = 200;
+    static const int BUTTON_HEIGHT = 100;
+    static const int BLACKJACK_THRESHOLD = 21;
 
     Game game_;
 
