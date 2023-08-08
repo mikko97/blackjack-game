@@ -8,40 +8,44 @@
 #include <QPixmap>
 #include <QLabel>
 #include <QTextBrowser>
+#include <QFontDatabase>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
 
+    QFont button_font1("Tahoma", 16, QFont::DemiBold);
+    QFont button_font2("Tahoma", 12, QFont::DemiBold);
+
     // Set up the main widget
-    QWidget* centralWidget = new QWidget(this);
-    setCentralWidget(centralWidget);
+    QWidget* central_widget = new QWidget(this);
+    setCentralWidget(central_widget);
 
     // Create the main layout for the central widget
-    QVBoxLayout* mainLayout = new QVBoxLayout(centralWidget);
+    QVBoxLayout* main_layout = new QVBoxLayout(central_widget);
 
     // Create the first group of frames (15 frames at the middle and upper side of the screen)
-    QHBoxLayout* group1Layout = new QHBoxLayout;
+    QHBoxLayout* dealer_layout = new QHBoxLayout;
     for (int i = 0; i < NUM_CARD_HOLDERS; ++i)
     {
         QLabel* label = new QLabel(this);
         label->setFixedSize(CARD_HOLDER_WIDTH, CARD_HOLDER_HEIGHT);
         label->setPixmap(QPixmap());
 
-        group1Layout->addWidget(label);
+        dealer_layout->addWidget(label);
         dealer_card_holders_.append(label);
     }
 
     // Create the second group of frames (15 frames at the middle and lower side of the screen)
-    QHBoxLayout* group2Layout = new QHBoxLayout;
+    QHBoxLayout* player_layout = new QHBoxLayout;
     for (int i = 0; i < NUM_CARD_HOLDERS; ++i)
     {
         QLabel* label = new QLabel(this);
         label->setFixedSize(CARD_HOLDER_WIDTH, CARD_HOLDER_HEIGHT);
         label->setPixmap(QPixmap());
 
-        group2Layout->addWidget(label);
+        player_layout->addWidget(label);
         player_card_holders_.append(label);
     }
 
@@ -52,21 +56,31 @@ MainWindow::MainWindow(QWidget *parent)
     hit_button_ = new QPushButton("Hit", this);
     hit_button_->setObjectName("Hit");
     hit_button_->setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT);
+    hit_button_->setStyleSheet("background-color: green");
+    hit_button_->setFont(button_font1);
+
     stay_button_ = new QPushButton("Stay", this);
     stay_button_->setObjectName("Stay");
     stay_button_->setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT);
+    stay_button_->setStyleSheet("background-color: red");
+    stay_button_->setFont(button_font1);
 
     button_layout1->addWidget(hit_button_);
     button_layout1->addWidget(stay_button_);
     button_layout1->addStretch(1);
-
     QHBoxLayout* button_layout2 = new QHBoxLayout;
+
     new_round_button_ = new QPushButton("New round", this);
     new_round_button_->setObjectName("New round");
     new_round_button_->setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT);
+    new_round_button_->setStyleSheet("background-color: white");
+    new_round_button_->setFont(button_font2);
+
     reset_button_ = new QPushButton("Reset game", this);
     reset_button_->setObjectName("Reset game");
     reset_button_->setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT);
+    reset_button_->setStyleSheet("background-color: white");
+    reset_button_->setFont(button_font2);
 
     button_layout2->addWidget(new_round_button_);
     button_layout2->addWidget(reset_button_);
@@ -74,13 +88,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Create a vertical layout
     QVBoxLayout* new_layout = new QVBoxLayout;
-    //QLabel* textbox1 = new Q("New Label", this);
     textbox1_ = new QTextBrowser();
+    textbox1_->setStyleSheet("padding: 22px; color: #ffff00; border-style: dashed; border-width: 8px; border-color: #ffff00");
     new_layout->addWidget(textbox1_);
 
     // Add the groups of frames to the main layout
-    mainLayout->addLayout(group1Layout);
-    mainLayout->addLayout(group2Layout);
+    main_layout->addLayout(dealer_layout);
+    main_layout->addLayout(player_layout);
 
     // Wrap button_layout1 and button_layout2 in a QVBoxLayout
     QVBoxLayout* buttons_layouts_container = new QVBoxLayout;
@@ -97,10 +111,11 @@ MainWindow::MainWindow(QWidget *parent)
     right_layout->addLayout(new_layout);
 
     // Add the right_layout to the main layout
-    mainLayout->addLayout(right_layout);
+    main_layout->addLayout(right_layout);
 
     // Set the main layout as the central widget's layout
-    centralWidget->setLayout(mainLayout);
+    central_widget->setLayout(main_layout);
+    central_widget->setStyleSheet("background-color: #008080");
 
     // Connecting slots
     connect(hit_button_, &QPushButton::clicked, this, &MainWindow::player_hit);
@@ -124,8 +139,9 @@ void MainWindow::new_round() {
     stay_button_->setEnabled(true);
 
     if(game_.get_player_points()==BLACKJACK_THRESHOLD) {
+        hit_button_->setEnabled(false);
+        stay_button_->setEnabled(false);
         update_UI(false);
-        dealer_turn();
     }
     else {
         update_UI(true);
@@ -166,8 +182,8 @@ void MainWindow::set_up_UI() {
     stay_button_->setEnabled(false);
 
     textbox1_->setText("Press the 'New round'-button to start the game");
-    QFont font("Arial", 22, QFont::Normal);
-    textbox1_->setFont(font);
+    QFont text_browser_font("Tahoma", 22);
+    textbox1_->setFont(text_browser_font);
 
     for(auto dealer_card_holder : dealer_card_holders_) {
         dealer_card_holder->setPixmap(QPixmap());
@@ -183,6 +199,9 @@ void MainWindow::update_UI(bool first_round) {
 
     int i = 0;
     for (const auto& dealer_card : dealer_hand) {
+        if(i>NUM_CARD_HOLDERS-1) {
+            i=NUM_CARD_HOLDERS-1;
+        }
         if(first_round==true and i==1) {
             QString card_image_path = QString(":/cards/backside.png");
             QPixmap pixmap = load_pixmap_from_resource(card_image_path);
@@ -200,6 +219,9 @@ void MainWindow::update_UI(bool first_round) {
 
     i = 0;
     for (const auto& player_card : player_hand) {
+        if(i>NUM_CARD_HOLDERS-1) {
+            i=NUM_CARD_HOLDERS-1;
+        }
         int suit_number = player_card->get_suit();
         int value_number = player_card->get_value();
         QString card_image_path = QString(":/cards/%1_%2.png").arg(value_number).arg(suit_number);

@@ -32,6 +32,10 @@ void Game::initial_draw() {
         tie_ = true;
         round_over_ = true;
     }
+    if(player_->get_points()==BLACKJACK_THRESHOLD and dealer_->get_points()!=BLACKJACK_THRESHOLD) {
+        player_won_ = true;
+        round_over_ = true;
+    }
 }
 
 void Game::dealer_turn() {

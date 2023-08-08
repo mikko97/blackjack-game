@@ -28,8 +28,7 @@ const std::vector<std::unique_ptr<Card>>& Dealer::get_hand() const {
 }
 
 int Dealer::get_points() const {
-    //return hand_->calculate_points();
-    return 21;
+    return hand_->calculate_points();
 }
 
 void Dealer::empty_hand() {

@@ -67,7 +67,7 @@ private:
     bool player_over_ = false;
     bool dealer_over_ = false;
 
-    static const int NUM_CARD_HOLDERS = 15;
+    static const int NUM_CARD_HOLDERS = 10;
     static const int CARD_HOLDER_WIDTH = 200;
     static const int CARD_HOLDER_HEIGHT = 300;
     static const int BUTTON_WIDTH = 200;
