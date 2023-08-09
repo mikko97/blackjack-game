@@ -9,6 +9,8 @@
 #include <QLabel>
 #include <QTextBrowser>
 #include <QFontDatabase>
+#include <QApplication>
+#include <QInputDialog>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -25,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
     // Create the main layout for the central widget
     QVBoxLayout* main_layout = new QVBoxLayout(central_widget);
 
-    // Create the first group of frames (15 frames at the middle and upper side of the screen)
+    // Create the first group of frames
     QHBoxLayout* dealer_layout = new QHBoxLayout;
     for (int i = 0; i < NUM_CARD_HOLDERS; ++i)
     {
@@ -35,9 +37,10 @@ MainWindow::MainWindow(QWidget *parent)
 
         dealer_layout->addWidget(label);
         dealer_card_holders_.append(label);
+        dealer_card_positions_.append(label->pos());
     }
 
-    // Create the second group of frames (15 frames at the middle and lower side of the screen)
+    // Create the second group of frames
     QHBoxLayout* player_layout = new QHBoxLayout;
     for (int i = 0; i < NUM_CARD_HOLDERS; ++i)
     {
@@ -47,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent)
 
         player_layout->addWidget(label);
         player_card_holders_.append(label);
+        player_card_positions_.append(label->pos());
     }
 
     // Create a horizontal layout for the buttons
@@ -82,15 +86,30 @@ MainWindow::MainWindow(QWidget *parent)
     reset_button_->setStyleSheet("background-color: white");
     reset_button_->setFont(button_font2);
 
+    stat_button_ = new QPushButton("Stats", this);
+    stat_button_->setObjectName("Stats");
+    stat_button_->setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT);
+    stat_button_->setStyleSheet("background-color: white");
+    stat_button_->setFont(button_font2);
+
     button_layout2->addWidget(new_round_button_);
     button_layout2->addWidget(reset_button_);
+    button_layout2->addWidget(stat_button_);
     button_layout2->addStretch(1);
 
     // Create a vertical layout
     QVBoxLayout* new_layout = new QVBoxLayout;
+    QFont text_browser_font("Tahoma", 22);
+
     textbox1_ = new QTextBrowser();
-    textbox1_->setStyleSheet("padding: 22px; color: #ffff00; border-style: dashed; border-width: 8px; border-color: #ffff00");
+    textbox1_->setStyleSheet("padding: 22px; color: white; border-style: dashed; border-width: 8px; border-color: white");
+    textbox1_->setFont(text_browser_font);
     new_layout->addWidget(textbox1_);
+
+    textbox2_ = new QTextBrowser();
+    textbox2_->setStyleSheet("padding: 22px; color: white; border-style: dashed; border-width: 8px; border-color: white");
+    textbox2_->setFont(text_browser_font);
+    new_layout->addWidget(textbox2_);
 
     // Add the groups of frames to the main layout
     main_layout->addLayout(dealer_layout);
@@ -131,9 +150,40 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::set_up_account() {
+    account_.empty_account();
+    bool ok;
+    int money = QInputDialog::getInt(nullptr, "Account", "Enter money to your account", 1, 10, 100, 1, &ok);
+    if(ok) {
+        account_.insert_money(money);
+        update_UI_balance();
+    }
+}
+
+void MainWindow::place_bet() {
+    int max_bet = account_.get_balance();
+    if(max_bet>0) {
+        bet_placed_ = true;
+        bool ok;
+        bet_ = QInputDialog::getInt(nullptr, "Bet", "Place your bet", 1, 1, max_bet, 1, &ok);
+    }
+    else {
+        set_up_account();
+    }
+}
+
+void MainWindow::update_UI_balance() {
+    int balance = account_.get_balance();
+    QString text = "Your balance: " + QString::number(balance) + "$";
+    if(bet_placed_) {
+        text += "\nYour bet: " + QString::number(bet_) + "$";
+    }
+    textbox2_->setText(text);
+}
 
 void MainWindow::new_round() {
     set_up_UI();
+    place_bet();
     game_.new_round();
     hit_button_->setEnabled(true);
     stay_button_->setEnabled(true);
@@ -151,6 +201,25 @@ void MainWindow::new_round() {
 void MainWindow::reset_game() {
     game_.reset_game();
     set_up_UI();
+    set_up_account();
+}
+
+void MainWindow::set_up_UI() {
+    bet_placed_ = false;
+    update_UI_balance();
+    player_over_ = false;
+    dealer_over_ = false;
+    hit_button_->setEnabled(false);
+    stay_button_->setEnabled(false);
+
+    textbox1_->setText("Press the 'New round'-button to start the game");
+
+    for(auto dealer_card_holder : dealer_card_holders_) {
+        dealer_card_holder->setPixmap(QPixmap());
+    }
+    for(auto player_card_holder : player_card_holders_) {
+        player_card_holder->setPixmap(QPixmap());
+    }
 }
 
 void MainWindow::player_hit() {
@@ -173,24 +242,6 @@ void MainWindow::dealer_turn() {
         dealer_over_ = true;
     }
     update_UI(false);
-}
-
-void MainWindow::set_up_UI() {
-    player_over_ = false;
-    dealer_over_ = false;
-    hit_button_->setEnabled(false);
-    stay_button_->setEnabled(false);
-
-    textbox1_->setText("Press the 'New round'-button to start the game");
-    QFont text_browser_font("Tahoma", 22);
-    textbox1_->setFont(text_browser_font);
-
-    for(auto dealer_card_holder : dealer_card_holders_) {
-        dealer_card_holder->setPixmap(QPixmap());
-    }
-    for(auto player_card_holder : player_card_holders_) {
-        player_card_holder->setPixmap(QPixmap());
-    }
 }
 
 void MainWindow::update_UI(bool first_round) {
@@ -239,11 +290,14 @@ void MainWindow::update_UI(bool first_round) {
         textbox1_->setText(text);
         hit_button_->setEnabled(false);
         stay_button_->setEnabled(false);
+        bet_placed_ = false;
     }
 
     else if(dealer_over_==true) {
         QString text = "Dealer went bust! \nYou won!";
         textbox1_->setText(text);
+        account_.insert_money(bet_);
+        bet_placed_ = false;
     }
 
     else if(game_.get_winner()=="Ongoing") {
@@ -251,7 +305,7 @@ void MainWindow::update_UI(bool first_round) {
         if(player_secondary_score!=player_score) {
             text += " or " + QString::number(player_secondary_score);
         }
-        text += "\nPress 'Hit' to draw new card \n";
+        text += "\n\nPress 'Hit' to draw new card \n";
         text += "Press 'Stay' to stay";
         textbox1_->setText(text);
     }
@@ -266,6 +320,8 @@ void MainWindow::update_UI(bool first_round) {
             text += "Dealer score: " + QString::number(dealer_score) + "\n";
         }
         textbox1_->setText(text);
+        account_.insert_money(bet_);
+        bet_placed_ = false;
     }
 
     else if(game_.get_winner()=="Dealer") {
@@ -278,13 +334,17 @@ void MainWindow::update_UI(bool first_round) {
             text += "Dealer score: " + QString::number(dealer_score) + "\n";
         }
         textbox1_->setText(text);
+        account_.take_money(bet_);
+        bet_placed_ = false;
     }
 
     else if(game_.get_winner()=="Tie") {
         QString text = "It's a tie! \n";
         text += "You both got blackjack!";
         textbox1_->setText(text);
+        bet_placed_ = false;
     }
+    update_UI_balance();
 }
 
 QPixmap MainWindow::load_pixmap_from_resource(const QString& file_path) {
@@ -305,6 +365,7 @@ QPixmap MainWindow::load_pixmap_from_resource(const QString& file_path) {
 
 void MainWindow::play() {
     set_up_UI();
+    set_up_account();
 }
 
 

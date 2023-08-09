@@ -2,12 +2,14 @@
 #define MAINWINDOW_HH
 
 #include <game.hh>
+#include <account.hh>
 
 #include <QMainWindow>
 #include <QLabel>
 #include <QPushButton>
 #include <QTextBrowser>
 #include <qfile.h>
+#include <QPropertyAnimation>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -44,6 +46,16 @@ private slots:
     void dealer_turn();
 
     /**
+     * @brief Set up players account
+     */
+    void set_up_account();
+
+    /**
+     * @brief Place the bet for the round
+     */
+    void place_bet();
+
+    /**
      * @brief Play the game
      */
     void play();
@@ -52,20 +64,30 @@ private:
 
     void set_up_UI();
     void update_UI(bool first_round);
+    void update_UI_balance();
     QPixmap load_pixmap_from_resource(const QString& file_path);
 
     Ui::MainWindow *ui;
     QPushButton* hit_button_;
     QPushButton* stay_button_;
     QPushButton* reset_button_;
-    QTextBrowser* textbox1_;
     QPushButton* new_round_button_;
+    QPushButton* stat_button_;
+    QTextBrowser* textbox1_;
+    QTextBrowser* textbox2_;
 
-    QList<QLabel*> player_card_holders_;
-    QList<QLabel*> dealer_card_holders_;
+    //QList<QLabel*> player_card_holders_;
+    //QList<QLabel*> dealer_card_holders_;
+    QVector<QLabel*> dealer_card_holders_;
+    QVector<QLabel*> player_card_holders_;
+    QVector<QPoint> dealer_card_positions_;
+    QVector<QPoint> player_card_positions_;
 
     bool player_over_ = false;
     bool dealer_over_ = false;
+    bool bet_placed_ = false;
+
+    int bet_;
 
     static const int NUM_CARD_HOLDERS = 10;
     static const int CARD_HOLDER_WIDTH = 200;
@@ -75,6 +97,7 @@ private:
     static const int BLACKJACK_THRESHOLD = 21;
 
     Game game_;
+    Account account_;
 
 };
 #endif // MAINWINDOW_HH
