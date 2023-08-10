@@ -3,6 +3,7 @@
 
 #include <game.hh>
 #include <account.hh>
+#include <database.hh>
 
 #include <QMainWindow>
 #include <QLabel>
@@ -20,7 +21,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(Database *db, QWidget *parent = nullptr);
     ~MainWindow();
 
 private slots:
@@ -61,6 +62,7 @@ private slots:
     void play();
 
 private:
+    Database *m_db;
 
     void set_up_UI();
     void update_UI(bool first_round);
@@ -73,6 +75,7 @@ private:
     QPushButton* reset_button_;
     QPushButton* new_round_button_;
     QPushButton* stat_button_;
+    QPushButton* take_money_button_;
     QTextBrowser* textbox1_;
     QTextBrowser* textbox2_;
 
@@ -95,6 +98,9 @@ private:
     static const int BUTTON_WIDTH = 200;
     static const int BUTTON_HEIGHT = 100;
     static const int BLACKJACK_THRESHOLD = 21;
+
+    const std::string RESET_MESSAGE = "Do you want to reset the game? It will"
+    "create a new deck, and your game history from this round will not be saved.";
 
     Game game_;
     Account account_;

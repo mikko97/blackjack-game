@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -11,6 +11,7 @@ CONFIG += c++17
 SOURCES += \
     account.cpp \
     card.cpp \
+    database.cpp \
     dealer.cpp \
     deck.cpp \
     game.cpp \
@@ -22,6 +23,7 @@ SOURCES += \
 HEADERS += \
     account.hh \
     card.hh \
+    database.hh \
     dealer.hh \
     deck.hh \
     game.hh \
