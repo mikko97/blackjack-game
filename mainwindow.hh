@@ -34,7 +34,7 @@ private slots:
     /**
      * @brief Start a new game
      */
-    void reset_game();
+    //void reset_game();
 
     /**
      * @brief Trigger the player's turn
@@ -52,6 +52,11 @@ private slots:
     void set_up_account();
 
     /**
+     * @brief Take the money
+     */
+    void take_money();
+
+    /**
      * @brief Place the bet for the round
      */
     void place_bet();
@@ -65,32 +70,28 @@ private:
     Database *m_db;
 
     void set_up_UI();
-    void update_UI(bool first_round);
+    void update_UI_cards(bool is_first_round);
+    void update_UI_game_status();
     void update_UI_balance();
     QPixmap load_pixmap_from_resource(const QString& file_path);
 
     Ui::MainWindow *ui;
     QPushButton* hit_button_;
     QPushButton* stay_button_;
-    QPushButton* reset_button_;
+    //QPushButton* reset_button_;
     QPushButton* new_round_button_;
     QPushButton* stat_button_;
     QPushButton* take_money_button_;
     QTextBrowser* textbox1_;
     QTextBrowser* textbox2_;
 
-    //QList<QLabel*> player_card_holders_;
-    //QList<QLabel*> dealer_card_holders_;
     QVector<QLabel*> dealer_card_holders_;
     QVector<QLabel*> player_card_holders_;
     QVector<QPoint> dealer_card_positions_;
     QVector<QPoint> player_card_positions_;
 
-    bool player_over_ = false;
-    bool dealer_over_ = false;
-    bool bet_placed_ = false;
-
     int bet_;
+    int inserted_money_;
 
     static const int NUM_CARD_HOLDERS = 10;
     static const int CARD_HOLDER_WIDTH = 200;
@@ -98,9 +99,6 @@ private:
     static const int BUTTON_WIDTH = 200;
     static const int BUTTON_HEIGHT = 100;
     static const int BLACKJACK_THRESHOLD = 21;
-
-    const std::string RESET_MESSAGE = "Do you want to reset the game? It will"
-    "create a new deck, and your game history from this round will not be saved.";
 
     Game game_;
     Account account_;

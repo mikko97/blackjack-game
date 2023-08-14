@@ -20,8 +20,7 @@ public:
     bool check_initial_record_exists(int user_id);
     bool update_rounds_won(int user_id, int rounds_won);
     bool update_rounds_lost(int user_id, int rounds_lost);
-    bool update_money_won(int user_id, int money_won);
-    bool update_money_lost(int user_id, int money_lost);
+    bool update_money_balance(int user_id, int money);
     QVector<QVariantMap> get_records();
 
 private:

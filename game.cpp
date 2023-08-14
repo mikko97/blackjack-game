@@ -13,11 +13,9 @@ Game::~Game()
 void Game::new_round() {
     dealer_->empty_hand();
     dealer_won_ = false;
-    dealer_over = false;
 
     player_->empty_hand();
     player_won_ = false; 
-    player_over = false;
 
     tie_ = false;
     round_over_ = false;
@@ -28,11 +26,12 @@ void Game::new_round() {
 void Game::initial_draw() {
     dealer_->initial_draw();
     player_->initial_draw();
-    if(player_->get_points()==BLACKJACK_THRESHOLD and dealer_->get_points()==BLACKJACK_THRESHOLD) {
+
+    if(is_blackjack_player() and is_blackjack_dealer()) {
         tie_ = true;
         round_over_ = true;
     }
-    if(player_->get_points()==BLACKJACK_THRESHOLD and dealer_->get_points()!=BLACKJACK_THRESHOLD) {
+    else if(is_blackjack_player()) {
         player_won_ = true;
         round_over_ = true;
     }
@@ -40,32 +39,28 @@ void Game::initial_draw() {
 
 void Game::dealer_turn() {
     dealer_->make_move();
-    if(dealer_->get_points()>BLACKJACK_THRESHOLD) {
-        dealer_over = true;
-    }
     determine_winner();
 }
 
 void Game::player_hit() {
     player_->draw_new_card();
-    if(player_->get_points()>BLACKJACK_THRESHOLD) {
-        player_over = true;
+    if(is_player_over()) {
         determine_winner();
     }
 }
 
 void Game::determine_winner() {
     if(!round_over_) {
-        if(player_over==true) {
+        if(is_player_over()) {
             dealer_won_ = true;
         }
-        else if(player_over==false and dealer_over==false and dealer_->get_points()>=player_->get_points()) {
-            dealer_won_ = true;
-        }
-        else if(player_over==false and dealer_over==false and player_->get_points()>dealer_->get_points()) {
+        else if(is_dealer_over()) {
             player_won_ = true;
         }
-        else if(player_over==false and dealer_over==true){
+        else if(dealer_->get_points()>=player_->get_points()) {
+            dealer_won_ = true;
+        }
+        else {
             player_won_ = true;
         }
     }
@@ -102,6 +97,34 @@ std::string Game::get_winner() {
         return "Tie";
     }
     return "Ongoing";
+}
+
+bool Game::is_blackjack_player() {
+    if(player_->get_points()==BLACKJACK_THRESHOLD) {
+        return true;
+    }
+    return false;
+}
+
+bool Game::is_blackjack_dealer() {
+    if(dealer_->get_points()==BLACKJACK_THRESHOLD) {
+        return true;
+    }
+    return false;
+}
+
+bool Game::is_player_over() {
+    if(player_->get_points()>21) {
+        return true;
+    }
+    return false;
+}
+
+bool Game::is_dealer_over() {
+    if(dealer_->get_points()>21) {
+        return true;
+    }
+    return false;
 }
 
 void Game::reset_game() {

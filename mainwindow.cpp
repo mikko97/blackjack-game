@@ -18,10 +18,12 @@ MainWindow::MainWindow(Database *db, QWidget *parent)
     : QMainWindow(parent)
     , m_db(db)
     , ui(new Ui::MainWindow)
+    , account_(db)
 {
 
     QFont button_font1("Tahoma", 16, QFont::DemiBold);
     QFont button_font2("Tahoma", 12, QFont::DemiBold);
+    QFont button_font3("Tahoma", 10, QFont::DemiBold);
 
     // Set up the main widget
     QWidget* central_widget = new QWidget(this);
@@ -72,11 +74,11 @@ MainWindow::MainWindow(Database *db, QWidget *parent)
     stay_button_->setStyleSheet("background-color: red");
     stay_button_->setFont(button_font1);
 
-    take_money_button_ = new QPushButton("Take money", this);
+    take_money_button_ = new QPushButton("Withdraw money", this);
     take_money_button_->setObjectName("Take");
     take_money_button_->setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT);
     take_money_button_->setStyleSheet("background-color: yellow");
-    take_money_button_->setFont(button_font1);
+    take_money_button_->setFont(button_font3);
 
     button_layout1->addWidget(hit_button_);
     button_layout1->addWidget(stay_button_);
@@ -90,11 +92,12 @@ MainWindow::MainWindow(Database *db, QWidget *parent)
     new_round_button_->setStyleSheet("background-color: white");
     new_round_button_->setFont(button_font2);
 
-    reset_button_ = new QPushButton("Reset game", this);
+    /*reset_button_ = new QPushButton("Reset game", this);
     reset_button_->setObjectName("Reset game");
     reset_button_->setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT);
     reset_button_->setStyleSheet("background-color: white");
     reset_button_->setFont(button_font2);
+    */
 
     stat_button_ = new QPushButton("Stats", this);
     stat_button_->setObjectName("Stats");
@@ -103,7 +106,7 @@ MainWindow::MainWindow(Database *db, QWidget *parent)
     stat_button_->setFont(button_font2);
 
     button_layout2->addWidget(new_round_button_);
-    button_layout2->addWidget(reset_button_);
+    //button_layout2->addWidget(reset_button_);
     button_layout2->addWidget(stat_button_);
     button_layout2->addStretch(1);
 
@@ -150,7 +153,8 @@ MainWindow::MainWindow(Database *db, QWidget *parent)
     connect(hit_button_, &QPushButton::clicked, this, &MainWindow::player_hit);
     connect(stay_button_, &QPushButton::clicked, this, &MainWindow::dealer_turn);
     connect(new_round_button_, &QPushButton::clicked, this, &MainWindow::new_round);
-    connect(reset_button_, &QPushButton::clicked, this, &MainWindow::reset_game);
+    //connect(reset_button_, &QPushButton::clicked, this, &MainWindow::reset_game);
+    connect(take_money_button_, &QPushButton::clicked, this, &MainWindow::take_money);
 
     play();
 }
@@ -161,11 +165,11 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::set_up_account() {
-    account_.empty_account();
     bool ok;
     int money = QInputDialog::getInt(nullptr, "Account", "Enter money to your account", 1, 10, 100, 1, &ok);
+
     if(ok) {
-        account_.insert_money(money);
+        account_.set_up_account(money);
         update_UI_balance();
     }
     else {
@@ -173,20 +177,34 @@ void MainWindow::set_up_account() {
     }
 }
 
+void MainWindow::take_money() {
+    take_money_button_->setEnabled(false);
+    int money_taken = account_.get_balance();
+    account_.withdraw_money(money_taken);
+
+    QString text = "You withdraw " + QString::number(money_taken) + "$\n";
+    text += "Your balance: 0$";
+    textbox2_->setText(text);
+}
+
 void MainWindow::place_bet() {
     int max_bet = account_.get_balance();
-    bet_placed_ = true;
     bool ok;
     bet_ = QInputDialog::getInt(nullptr, "Bet", "Place your bet", 1, 1, max_bet, 1, &ok);
+
     if(!ok) {
         place_bet();
+    }
+    else {
+        account_.place_bet();
     }
 }
 
 void MainWindow::update_UI_balance() {
     int balance = account_.get_balance();
     QString text = "Your balance: " + QString::number(balance) + "$";
-    if(bet_placed_) {
+
+    if(account_.is_bet_placed()) {
         text += "\nYour bet: " + QString::number(bet_) + "$";
     }
     textbox2_->setText(text);
@@ -199,17 +217,19 @@ void MainWindow::new_round() {
     }
     place_bet();
     game_.new_round();
+
     hit_button_->setEnabled(true);
     stay_button_->setEnabled(true);
 
-    if(game_.get_player_points()==BLACKJACK_THRESHOLD) {
+    if(game_.is_blackjack_player()) {
         hit_button_->setEnabled(false);
         stay_button_->setEnabled(false);
-        update_UI(false);
+        update_UI_cards(false);
     }
     else {
-        update_UI(true);
+        update_UI_cards(true);
     }
+    update_UI_game_status();
 
     QVector<QVariantMap> records = m_db->get_records();
 
@@ -219,30 +239,32 @@ void MainWindow::new_round() {
         qDebug() << "User ID:" << record["user_id"].toInt();
         qDebug() << "Rounds Won:" << record["rounds_won"].toInt();
         qDebug() << "Rounds Lost:" << record["rounds_lost"].toInt();
-        qDebug() << "Money Won:" << record["money_won"].toInt();
-        qDebug() << "Money Lost:" << record["money_lost"].toInt();
+        qDebug() << "Money Balance:" << record["money_balance"].toInt();
     }
 }
 
+/*
 void MainWindow::reset_game() {
     int result = QMessageBox::question(this, "Confirmation", "Do you want to"
     " reset the game? A new deck will be created, and your game history from"
     " this round will not be saved.", QMessageBox::Yes | QMessageBox::Cancel);
 
     if (result == QMessageBox::Yes) {
+        take_money();
         game_.reset_game();
         account_.empty_account();
         set_up_UI();
     }
 }
+*/
 
 void MainWindow::set_up_UI() {
-    bet_placed_ = false;
+    account_.empty_bet();
     update_UI_balance();
-    player_over_ = false;
-    dealer_over_ = false;
+
     hit_button_->setEnabled(false);
     stay_button_->setEnabled(false);
+    take_money_button_->setEnabled(false);
 
     textbox1_->setText("Press the 'New round'-button to start the game");
 
@@ -256,27 +278,28 @@ void MainWindow::set_up_UI() {
 
 void MainWindow::player_hit() {
     game_.player_hit();
-    update_UI(true);
-    if(game_.get_player_points()==BLACKJACK_THRESHOLD) {
+    update_UI_cards(true);
+    update_UI_game_status();
+
+    if(game_.is_blackjack_player()) {
         dealer_turn();
     }
-    else if(game_.get_player_points()>BLACKJACK_THRESHOLD) {
-        player_over_ = true;
-        update_UI(true);
+    else if(game_.is_player_over()) {
+        hit_button_->setEnabled(false);
+        stay_button_->setEnabled(false);
     }
 }
 
 void MainWindow::dealer_turn() {
     hit_button_->setEnabled(false);
     stay_button_->setEnabled(false);
+
     game_.dealer_turn();
-    if(game_.get_dealer_points()>BLACKJACK_THRESHOLD) {
-        dealer_over_ = true;
-    }
-    update_UI(false);
+    update_UI_cards(false);
+    update_UI_game_status();
 }
 
-void MainWindow::update_UI(bool first_round) {
+void MainWindow::update_UI_cards(bool is_first_round) {
     const std::vector<std::unique_ptr<Card>>& dealer_hand = game_.get_dealer_hand();
     const std::vector<std::unique_ptr<Card>>& player_hand = game_.get_player_hand();
 
@@ -285,7 +308,7 @@ void MainWindow::update_UI(bool first_round) {
         if(i>NUM_CARD_HOLDERS-1) {
             i=NUM_CARD_HOLDERS-1;
         }
-        if(first_round==true and i==1) {
+        if(is_first_round and i==1) {
             QString card_image_path = QString(":/cards/backside.png");
             QPixmap pixmap = load_pixmap_from_resource(card_image_path);
             dealer_card_holders_.at(i)->setPixmap(pixmap.scaled(dealer_card_holders_.at(0)->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
@@ -312,78 +335,76 @@ void MainWindow::update_UI(bool first_round) {
         player_card_holders_.at(i)->setPixmap(pixmap.scaled(player_card_holders_.at(0)->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
         i++;
     }
+}
 
+void MainWindow::update_UI_game_status() {
     int player_score = game_.get_player_points();
     int player_secondary_score = game_.get_player_secondary_points();
     int dealer_score = game_.get_dealer_points();
 
-    if(player_over_==true) {
-        QString text = "You went bust! \nDealer won!";
-        textbox1_->setText(text);
-        hit_button_->setEnabled(false);
-        stay_button_->setEnabled(false);
-        bet_placed_ = false;
-    }
-
-    else if(dealer_over_==true) {
-        if(game_.get_player_points()==BLACKJACK_THRESHOLD) {
-            QString text = "You got blackjack!\nDealer went bust! \nYou won!";
+    if(game_.get_winner()=="Player") {
+        QString text = "You won!\n";
+        if(game_.is_blackjack_player()) {
+            text += "You got blackjack!\n";
         }
-        QString text = "Dealer went bust! \nYou won!";
-        textbox1_->setText(text);
-        account_.insert_money(bet_);
-        bet_placed_ = false;
-        m_db->update_rounds_won(1,1);
-    }
-
-    else if(game_.get_winner()=="Ongoing") {
-        QString text = "Your score: " + QString::number(player_score);
-        if(player_secondary_score!=player_score) {
-            text += " or " + QString::number(player_secondary_score);
+        if(game_.is_dealer_over()) {
+            text += "Dealer went bust!";
         }
-        text += "\n\nPress 'Hit' to draw new card \n";
-        text += "Press 'Stay' to stay";
-        textbox1_->setText(text);
-    }
-
-    else if(game_.get_winner()=="Player"){
-        QString text = "You won! \n";
-        if(game_.get_player_points()==BLACKJACK_THRESHOLD) {
-            text += "You got blackjack!";
-        }
-        else {
+        else if(!game_.is_blackjack_player() and !game_.is_dealer_over()){
             text += "Your score: " + QString::number(player_score) + "\n";
             text += "Dealer score: " + QString::number(dealer_score) + "\n";
         }
         textbox1_->setText(text);
-        account_.insert_money(bet_);
-        bet_placed_ = false;
+        account_.add_balance(bet_);
+        account_.empty_bet();
         m_db->update_rounds_won(1,1);
+        if(account_.get_balance()>0) {
+            take_money_button_->setEnabled(true);
+        }
     }
 
     else if(game_.get_winner()=="Dealer") {
         QString text = "Dealer won! \n";
-        if(game_.get_player_points()==BLACKJACK_THRESHOLD) {
-            text += "You got blackjack!\n";
+        if(game_.is_blackjack_player() and game_.is_blackjack_dealer()) {
+            text += "You both got blackjack!\n";
         }
-        if(game_.get_dealer_points()==BLACKJACK_THRESHOLD) {
-            text += "Dealer got blackjack!";
+        else if(game_.is_blackjack_dealer() and !game_.is_player_over()) {
+            text += "Dealer got blackjack!\n";
+            text += "Your score: " + QString::number(player_score) + "\n";
+        }
+        else if(game_.is_player_over()) {
+            text += "You went bust!";
         }
         else {
             text += "Your score: " + QString::number(player_score) + "\n";
             text += "Dealer score: " + QString::number(dealer_score) + "\n";
         }
         textbox1_->setText(text);
-        account_.take_money(bet_);
-        bet_placed_ = false;
+        account_.decrease_balance(bet_);
+        account_.empty_bet();
         m_db->update_rounds_lost(1,1);
+        if(account_.get_balance()>0) {
+            take_money_button_->setEnabled(true);
+        }
     }
 
     else if(game_.get_winner()=="Tie") {
-        QString text = "It's a tie! \n";
-        text += "You both got blackjack!";
+        QString text = "It's a tie!\nYou both got blackjack!";
         textbox1_->setText(text);
-        bet_placed_ = false;
+        account_.empty_bet();
+        if(account_.get_balance()>0) {
+            take_money_button_->setEnabled(true);
+        }
+    }
+
+    else {
+        QString text = "Your score: " + QString::number(player_score);
+        if(player_secondary_score!=player_score) {
+            text += " or " + QString::number(player_secondary_score);
+        }
+        text += "\n\nPress 'Hit' to draw new card\n";
+        text += "Press 'Stay' to stay";
+        textbox1_->setText(text);
     }
     update_UI_balance();
 }

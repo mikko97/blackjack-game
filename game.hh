@@ -64,6 +64,26 @@ public:
     void player_hit();
 
     /**
+     * @brief Check if player has blackjack
+     */
+    bool is_blackjack_player();
+
+    /**
+     * @brief Check if dealer has blackjack
+     */
+    bool is_blackjack_dealer();
+
+    /**
+     * @brief Check if player is over
+     */
+    bool is_player_over();
+
+    /**
+     * @brief Check if dealer is over
+     */
+    bool is_dealer_over();
+
+    /**
      * @brief Reset the game
      */
     void reset_game();
@@ -76,8 +96,6 @@ private:
     bool player_won_ = false;
     bool dealer_won_ = false;
     bool tie_ = false;
-    bool player_over = false;
-    bool dealer_over = false;
     bool round_over_ = false;
 
     static const int BLACKJACK_THRESHOLD = 21;
