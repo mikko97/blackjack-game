@@ -1,18 +1,5 @@
 #include "mainwindow.hh"
 #include "ui_mainwindow.h"
-#include "database.hh"
-
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QPushButton>
-#include <QDebug>
-#include <QPixmap>
-#include <QLabel>
-#include <QTextBrowser>
-#include <QFontDatabase>
-#include <QApplication>
-#include <QInputDialog>
-#include <QMessageBox>
 
 MainWindow::MainWindow(Database *db, QWidget *parent) :
     QMainWindow(parent),
@@ -75,15 +62,15 @@ MainWindow::MainWindow(Database *db, QWidget *parent) :
     stay_button_->setStyleSheet("background-color: red");
     stay_button_->setFont(button_font1);
 
-    take_money_button_ = new QPushButton("Withdraw money", this);
-    take_money_button_->setObjectName("Take");
-    take_money_button_->setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT);
-    take_money_button_->setStyleSheet("background-color: yellow");
-    take_money_button_->setFont(button_font3);
+    withdraw_money_button_ = new QPushButton("Withdraw money", this);
+    withdraw_money_button_->setObjectName("Withdraw");
+    withdraw_money_button_->setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT);
+    withdraw_money_button_->setStyleSheet("background-color: yellow");
+    withdraw_money_button_->setFont(button_font3);
 
     button_layout1->addWidget(hit_button_);
     button_layout1->addWidget(stay_button_);
-    button_layout1->addWidget(take_money_button_);
+    button_layout1->addWidget(withdraw_money_button_);
     button_layout1->addStretch(1);
     QHBoxLayout* button_layout2 = new QHBoxLayout;
 
@@ -93,22 +80,15 @@ MainWindow::MainWindow(Database *db, QWidget *parent) :
     new_round_button_->setStyleSheet("background-color: white");
     new_round_button_->setFont(button_font2);
 
-    /*reset_button_ = new QPushButton("Reset game", this);
-    reset_button_->setObjectName("Reset game");
-    reset_button_->setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT);
-    reset_button_->setStyleSheet("background-color: white");
-    reset_button_->setFont(button_font2);
-    */
-
-    stat_button_ = new QPushButton("Stats", this);
-    stat_button_->setObjectName("Stats");
-    stat_button_->setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT);
-    stat_button_->setStyleSheet("background-color: white");
-    stat_button_->setFont(button_font2);
+    statistics_button_ = new QPushButton("Stats", this);
+    statistics_button_->setObjectName("Stats");
+    statistics_button_->setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT);
+    statistics_button_->setStyleSheet("background-color: white");
+    statistics_button_->setFont(button_font2);
 
     button_layout2->addWidget(new_round_button_);
     //button_layout2->addWidget(reset_button_);
-    button_layout2->addWidget(stat_button_);
+    button_layout2->addWidget(statistics_button_);
     button_layout2->addStretch(1);
 
     // Create a vertical layout
@@ -151,12 +131,12 @@ MainWindow::MainWindow(Database *db, QWidget *parent) :
     central_widget->setStyleSheet("background-color: #008080");
 
     // Connecting slots
-    connect(hit_button_, &QPushButton::clicked, this, &MainWindow::player_hit);
+    connect(hit_button_, &QPushButton::clicked, this, &MainWindow::on_hit_button_pressed);
     connect(stay_button_, &QPushButton::clicked, this, &MainWindow::dealer_turn);
     connect(new_round_button_, &QPushButton::clicked, this, &MainWindow::new_round);
     //connect(reset_button_, &QPushButton::clicked, this, &MainWindow::reset_game);
-    connect(take_money_button_, &QPushButton::clicked, this, &MainWindow::take_money);
-    connect(stat_button_, &QPushButton::clicked, this, &MainWindow::open_stats_window);
+    connect(withdraw_money_button_, &QPushButton::clicked, this, &MainWindow::on_withdraw_button_pressed);
+    connect(statistics_button_, &QPushButton::clicked, this, &MainWindow::on_statistics_button_pressed);
 
     play();
 }
@@ -179,8 +159,8 @@ void MainWindow::set_up_account() {
     }
 }
 
-void MainWindow::take_money() {
-    take_money_button_->setEnabled(false);
+void MainWindow::on_withdraw_button_pressed() {
+    withdraw_money_button_->setEnabled(false);
     int money_taken = account_.get_balance();
     account_.withdraw_money(money_taken);
 
@@ -234,28 +214,13 @@ void MainWindow::new_round() {
     update_UI_game_status();
 }
 
-/*
-void MainWindow::reset_game() {
-    int result = QMessageBox::question(this, "Confirmation", "Do you want to"
-    " reset the game? A new deck will be created, and your game history from"
-    " this round will not be saved.", QMessageBox::Yes | QMessageBox::Cancel);
-
-    if (result == QMessageBox::Yes) {
-        take_money();
-        game_.reset_game();
-        account_.empty_account();
-        set_up_UI();
-    }
-}
-*/
-
 void MainWindow::set_up_UI() {
     account_.empty_bet();
     update_UI_balance();
 
     hit_button_->setEnabled(false);
     stay_button_->setEnabled(false);
-    take_money_button_->setEnabled(false);
+    withdraw_money_button_->setEnabled(false);
 
     textbox1_->setText("Press the 'New round'-button to start the game");
 
@@ -267,7 +232,7 @@ void MainWindow::set_up_UI() {
     }
 }
 
-void MainWindow::player_hit() {
+void MainWindow::on_hit_button_pressed() {
     game_.player_hit();
     update_UI_cards(true);
     update_UI_game_status();
@@ -350,7 +315,7 @@ void MainWindow::update_UI_game_status() {
         account_.empty_bet();
         m_db->add_win_record(1,true);
         if(account_.get_balance()>0) {
-            take_money_button_->setEnabled(true);
+            withdraw_money_button_->setEnabled(true);
         }
     }
 
@@ -375,7 +340,7 @@ void MainWindow::update_UI_game_status() {
         account_.empty_bet();
         m_db->add_win_record(1,false);
         if(account_.get_balance()>0) {
-            take_money_button_->setEnabled(true);
+            withdraw_money_button_->setEnabled(true);
         }
     }
 
@@ -384,7 +349,7 @@ void MainWindow::update_UI_game_status() {
         textbox1_->setText(text);
         account_.empty_bet();
         if(account_.get_balance()>0) {
-            take_money_button_->setEnabled(true);
+            withdraw_money_button_->setEnabled(true);
         }
     }
 
@@ -416,9 +381,25 @@ QPixmap MainWindow::load_pixmap_from_resource(const QString& file_path) {
     return pixmap;
 }
 
-void MainWindow::open_stats_window() {
+void MainWindow::on_statistics_button_pressed() {
     statistics_window_.show();
 }
+
+void MainWindow::closeEvent(QCloseEvent *event) {
+    QMessageBox::StandardButton result = QMessageBox::question(
+        this,
+        "Confirmation",
+        "Are you sure you want to exit?",
+        QMessageBox::Yes | QMessageBox::No
+    );
+
+    if (result == QMessageBox::Yes) {
+        event->accept();
+    } else {
+        event->ignore();
+    }
+}
+
 
 void MainWindow::play() {
     set_up_UI();

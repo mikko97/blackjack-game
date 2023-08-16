@@ -9,7 +9,6 @@ int main(int argc, char *argv[])
 
     Database db;
     if (db.open_database()) {
-        // Create tables if they don't exist
         if (!db.create_tables()) {
             qDebug() << "Error creating tables.";
             return 1;
@@ -24,7 +23,7 @@ int main(int argc, char *argv[])
     }
 
     else {
-        // Handle database opening error
+        qDebug() << "Error opening database.";
         return 1;
     }
 }

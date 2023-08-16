@@ -2,7 +2,6 @@
 #define PLAYER_HH
 
 #include <hand.hh>
-#include <iostream>
 
 class Player
 {
@@ -10,6 +9,7 @@ public:
 
     /**
      * @brief Player constructor
+     * @param Reference to the deck object
      */
     Player(Deck& deck);
 
@@ -30,7 +30,7 @@ public:
 
     /**
      * @brief Get the hand which holds the current cards dealt
-     * @return The hand of the player
+     * @return Reference to the vector containing the pointers to the card objects
      */
     const std::vector<std::unique_ptr<Card>>& get_hand() const;
 
@@ -41,13 +41,13 @@ public:
     int get_points() const;
 
     /**
-     * @brief Get the points of the cards in hand
+     * @brief Get the secondary points of the cards in hand when ace is dealt
      * @return The points
      */
     int get_secondary_points() const;
 
     /**
-     * @brief Empty hand
+     * @brief Empty the hand
      */
     void empty_hand();
 

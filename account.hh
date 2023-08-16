@@ -18,6 +18,7 @@ public:
 
     /**
      * @brief Set up the users account
+     * @param Users chosen money deposit
      */
     void set_up_account(int money);
 
@@ -29,21 +30,24 @@ public:
 
     /**
      * @brief Add account balance
+     * @param money to be added to the account
      */
     void add_balance(int money);
 
     /**
      * @brief Decrease account balance
+     * @param money to be decreased from the account
      */
     void decrease_balance(int money);
 
     /**
      * @brief Withdraw money from the account
+     * @param money to be withdrawed from the account
      */
     void withdraw_money(int money);
 
     /**
-     * @brief Empty the account
+     * @brief Empty the players account
      */
     void empty_account();
 

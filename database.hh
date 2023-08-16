@@ -7,6 +7,8 @@
 #include <QtSql/QSqlError>
 #include <QDateTime>
 #include <QPointF>
+#include <QDebug>
+
 
 class Database : public QObject {
     Q_OBJECT
@@ -66,16 +68,7 @@ public:
      * @brief Fetch total money won per day
      * @return Qmap, which has the day as key and the total money won as value
      */
-    QMap<QDate, int> fetch_total_money_per_day();
-
-
-
-    bool insert_initial_record(int user_id);
-    bool check_initial_record_exists(int user_id);
-    bool update_rounds_won(int user_id, int rounds_won);
-    bool update_rounds_lost(int user_id, int rounds_lost);
-    bool update_money_balance(int user_id, int money);
-    QVector<QVariantMap> get_records();
+    QMap<QDateTime, int> fetch_total_money_per_day();
 
 private:
     QSqlDatabase m_db;

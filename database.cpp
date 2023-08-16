@@ -1,5 +1,4 @@
 #include "database.hh"
-#include <QDebug>
 
 Database::Database(QObject *parent) : QObject(parent) {
     m_db = QSqlDatabase::addDatabase("QSQLITE");
@@ -79,7 +78,6 @@ bool Database::add_money_record(int user_id, int money_won) {
     return true;
 }
 
-
 QVector<QPointF> Database::fetch_money_records(int user_id) {
     QVector<QPointF> data_points;
 
@@ -123,11 +121,12 @@ QVector<QPointF> Database::fetch_win_records(int user_id) {
     return data_points;
 }
 
-QMap<QDate, int> Database::fetch_total_money_per_day() {
-    QMap<QDate, int> money_per_day;
+QMap<QDateTime, int> Database::fetch_total_money_per_day() {
+    QMap<QDateTime, int> money_per_day;
 
     QSqlQuery query;
     query.prepare("SELECT DATE(date_time) AS day, SUM(money_won) AS total_money FROM money_record GROUP BY day");
+    //query.prepare("SELECT date_time, SUM(money_won) AS total_money FROM money_record GROUP BY day");
 
     if (!query.exec()) {
         qDebug() << "Error fetching total money per day: " << query.lastError();
@@ -135,9 +134,9 @@ QMap<QDate, int> Database::fetch_total_money_per_day() {
     }
 
     while (query.next()) {
-        QDate day = query.value("day").toDate();
+        QDateTime date_time = query.value("day").toDateTime();
         int total_money = query.value("total_money").toInt();
-        money_per_day.insert(day, total_money);
+        money_per_day.insert(date_time, total_money);
     }
 
     return money_per_day;

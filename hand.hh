@@ -11,6 +11,7 @@ class Hand
 public:
     /**
      * @brief Hand constructor
+     * @param Reference to the deck object
      */
     Hand(Deck& deck);
 
@@ -31,18 +32,18 @@ public:
 
     /**
      * @brief Get the hand which holds the current cards dealt
-     * @return The hand
+     * @return Reference to the vector containing the pointers to the card objects
      */
     const std::vector<std::unique_ptr<Card>>& get_hand() const;
 
     /**
-     * @brief Calculate points of the cards in the hand
+     * @brief Calculate the points of the cards in hand
      * @return The points
      */
     int calculate_points() const;
 
     /**
-     * @brief Calculate secondary points relating to ace in hand
+     * @brief Calculate secondary points of the cards in hand
      * @return The points
      */
     int calculate_secondary_points() const;

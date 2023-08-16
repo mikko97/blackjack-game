@@ -11,6 +11,7 @@ public:
 
     /**
      * @brief Dealer constructor
+     * @param Reference to the deck object
      */
     Dealer(Deck& deck);
 
@@ -30,14 +31,13 @@ public:
     void draw_new_card();
 
     /**
-     * @brief Make the move after the initial draw of cards
-     * @return The points of the hand after the move
+     * @brief Make the moves after the initial draw of cards
      */
     void make_move();
 
     /**
      * @brief Get the hand which holds the current cards dealt
-     * @return The hand of the dealer
+     * @return Reference to the vector containing the pointers to the card objects
      */
     const std::vector<std::unique_ptr<Card>>& get_hand() const;
 

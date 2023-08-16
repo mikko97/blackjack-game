@@ -1,5 +1,4 @@
 #include "game.hh"
-#include <algorithm>
 
 Game::Game() :
     deck_(std::make_unique<Deck>()),

@@ -10,6 +10,12 @@
 #include <QtCharts/QBarSet>
 #include <QtCharts/QBarSeries>
 #include <QVBoxLayout>
+#include <QSqlQuery>
+#include <QSqlRecord>
+#include <QDebug>
+#include <QDateTimeAxis>
+#include <QValueAxis>
+#include <QBarCategoryAxis>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class StatisticsWindow; }
@@ -33,6 +39,7 @@ private:
     QtCharts::QChartView *chart_view_;
     QtCharts::QBarSet *bar_set_;
     QtCharts::QBarSeries *bar_series_;
+    QtCharts::QLineSeries *line_series_;
     QStringList categories_;
     QtCharts::QChart *chart_;
 };

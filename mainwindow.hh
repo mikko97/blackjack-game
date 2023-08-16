@@ -5,7 +5,6 @@
 #include "account.hh"
 #include "database.hh"
 #include "statisticswindow.hh"
-#include "ui_statisticswindow.h"
 
 #include <QMainWindow>
 #include <QLabel>
@@ -13,6 +12,15 @@
 #include <QTextBrowser>
 #include <qfile.h>
 #include <QPropertyAnimation>
+#include <QCloseEvent>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QDebug>
+#include <QPixmap>
+#include <QFontDatabase>
+#include <QApplication>
+#include <QInputDialog>
+#include <QMessageBox>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -25,6 +33,13 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(Database *db, QWidget *parent = nullptr);
     ~MainWindow();
+
+protected:
+    /**
+     * @brief Invoke a confirmation dialogue if user tries to close the app
+     * @param QCloseEvent - i.e event invoken if user tries to close the app
+     */
+    void closeEvent(QCloseEvent *event) override;
 
 private slots:
 
@@ -39,9 +54,9 @@ private slots:
     //void reset_game();
 
     /**
-     * @brief Trigger the player's turn
+     * @brief Handles the event when the "Hit" button is pressed.
      */
-    void player_hit();
+    void on_hit_button_pressed();
 
     /**
      * @brief Trigger the dealer's turn
@@ -49,17 +64,27 @@ private slots:
     void dealer_turn();
 
     /**
-     * @brief Take the money
+     * @brief Handles the event when the "Withdraw" button is pressed
+     *        to withdraw the money from the users account.
      */
-    void take_money();
+    void on_withdraw_button_pressed();
 
     /**
-     * @brief Open the statistics window
+     * @brief Handles the event when the "Statistics" button is pressed
+     *        to open the statistics window
      */
-    void open_stats_window();
+    void on_statistics_button_pressed();
 
 private:
-    Database *m_db;
+    /**
+     * @brief Play the game
+     */
+    void play();
+
+    /**
+     * @brief Set the UI up for a new round
+     */
+    void set_up_UI();
 
     /**
      * @brief Set up players account
@@ -70,16 +95,6 @@ private:
      * @brief Place the bet for the round
      */
     void place_bet();
-
-    /**
-     * @brief Play the game
-     */
-    void play();
-
-    /**
-     * @brief Set the UI up for a new round
-     */
-    void set_up_UI();
 
     /**
      * @brief Update the images on the card image holders
@@ -99,16 +114,18 @@ private:
 
     /**
      * @brief Load the images from the resources
+     * @param File path to the images
      */
     QPixmap load_pixmap_from_resource(const QString& file_path);
 
+    Database *m_db;
     Ui::MainWindow *ui;
+
     QPushButton* hit_button_;
     QPushButton* stay_button_;
-    //QPushButton* reset_button_;
     QPushButton* new_round_button_;
-    QPushButton* stat_button_;
-    QPushButton* take_money_button_;
+    QPushButton* statistics_button_;
+    QPushButton* withdraw_money_button_;
     QTextBrowser* textbox1_;
     QTextBrowser* textbox2_;
 

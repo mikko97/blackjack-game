@@ -8,6 +8,7 @@
 #include <memory>
 #include <random>
 #include <algorithm>
+#include <chrono>
 
 
 class Deck
@@ -30,7 +31,7 @@ public:
 
     /**
      * @brief Draw a card from the deck
-     * @return The card
+     * @return Pointer to the card object
      */
     std::unique_ptr<Card> draw_card();
 
@@ -41,7 +42,7 @@ public:
 
     /**
      * @brief Get the deck of cards
-     * @return Reference to the vector containing the cards
+     * @return Reference to the vector containing the pointers to the card objects
      */
     std::vector<std::unique_ptr<Card>>& get_deck();
 
