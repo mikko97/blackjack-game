@@ -66,6 +66,9 @@ public:
 private:
     int balance_ = 0;
     int bet_;
+    int first_data_point_;
+    int second_data_point_;
+    int money_won_;
     bool bet_placed_ = false;
     Database *m_db;
 };

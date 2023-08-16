@@ -3,7 +3,7 @@
 
 Database::Database(QObject *parent) : QObject(parent) {
     m_db = QSqlDatabase::addDatabase("QSQLITE");
-    m_db.setDatabaseName("blackjack_record.db");
+    m_db.setDatabaseName("blackjack.db");
 }
 
 Database::~Database() {
@@ -27,15 +27,19 @@ void Database::close_database() {
 bool Database::create_tables() {
     QSqlQuery query;
 
-    // Create the blackjack_record table if it doesn't exist
-    QString createTableQuery = "CREATE TABLE IF NOT EXISTS blackjack_record ("
+    QString createTableQuery = "CREATE TABLE IF NOT EXISTS win_record ("
                               "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                               "user_id INTEGER,"
-                              "rounds_won INTEGER,"
-                              "rounds_lost INTEGER,"
-                              "money_balance INTEGER);";
+                              "round_won BOOL,"
+                              "date_time DATETIME DEFAULT CURRENT_TIMESTAMP);";
 
-    if (!query.exec(createTableQuery)) {
+    QString createTableQuery2 = "CREATE TABLE IF NOT EXISTS money_record ("
+                              "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                              "user_id INTEGER,"
+                              "money_won INTEGER,"
+                              "date_time DATETIME DEFAULT CURRENT_TIMESTAMP);";
+
+    if (!query.exec(createTableQuery) or !query.exec(createTableQuery2)) {
         qDebug() << "Error creating table: " << query.lastError();
         return false;
     }
@@ -43,109 +47,98 @@ bool Database::create_tables() {
     return true;
 }
 
-bool Database::insert_initial_record(int user_id) {
+bool Database::add_win_record(int user_id, bool round_won) {
     QSqlQuery query;
 
-    QString insertQuery = "INSERT INTO blackjack_record (user_id, rounds_won, rounds_lost, money_balance) "
-                          "VALUES (:user_id, 0, 0, 0);";
-
-    query.prepare(insertQuery);
+    query.prepare("INSERT INTO win_record (user_id, round_won) VALUES (:user_id, :round_won)");
     query.bindValue(":user_id", user_id);
+    query.bindValue(":round_won", round_won);
 
     if (!query.exec()) {
-        qDebug() << "Error inserting initial record: " << query.lastError();
+        qDebug() << "Error adding win record: " << query.lastError();
         return false;
     }
-    qDebug() << "Initial record inserted successfully!";
+
+    qDebug() << "Win record added successfully!";
     return true;
 }
 
-bool Database::check_initial_record_exists(int user_id) {
-    QSqlQuery query;
-    query.prepare("SELECT id FROM blackjack_record WHERE user_id = :user_id;");
-    query.bindValue(":user_id", user_id);
-
-    if (query.exec() && query.next()) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-bool Database::update_rounds_won(int user_id, int rounds_won) {
+bool Database::add_money_record(int user_id, int money_won) {
     QSqlQuery query;
 
-    QString updateQuery = "UPDATE blackjack_record "
-                          "SET rounds_won = rounds_won + :rounds_won "
-                          "WHERE user_id = :user_id;";
-
-    query.prepare(updateQuery);
-    query.bindValue(":rounds_won", rounds_won);
+    query.prepare("INSERT INTO money_record (user_id, money_won) VALUES (:user_id, :money_won)");
     query.bindValue(":user_id", user_id);
+    query.bindValue(":money_won", money_won);
 
     if (!query.exec()) {
-        qDebug() << "Error updating rounds won: " << query.lastError();
+        qDebug() << "Error adding money record: " << query.lastError();
         return false;
     }
-    qDebug() << "Rounds won updated successfully!";
+
+    qDebug() << "Money record added successfully!";
     return true;
 }
 
-bool Database::update_rounds_lost(int user_id, int rounds_lost) {
+
+QVector<QPointF> Database::fetch_money_records(int user_id) {
+    QVector<QPointF> data_points;
+
     QSqlQuery query;
-
-    QString updateQuery = "UPDATE blackjack_record "
-                          "SET rounds_lost = rounds_lost + :rounds_lost "
-                          "WHERE user_id = :user_id;";
-
-    query.prepare(updateQuery);
-    query.bindValue(":rounds_lost", rounds_lost);
+    query.prepare("SELECT money_won, date_time FROM money_record WHERE user_id = :user_id");
     query.bindValue(":user_id", user_id);
 
     if (!query.exec()) {
-        qDebug() << "Error updating rounds lost: " << query.lastError();
-        return false;
+        qDebug() << "Error fetching money records: " << query.lastError();
+        return data_points;
     }
-    qDebug() << "Rounds lost updated successfully!";
-    return true;
+
+    while (query.next()) {
+        int money_won = query.value("money_won").toInt();
+        QDateTime date_time = query.value("date_time").toDateTime();
+        data_points.append(QPointF(date_time.toMSecsSinceEpoch(), money_won));
+    }
+
+    return data_points;
 }
 
-bool Database::update_money_balance(int user_id, int money) {
+QVector<QPointF> Database::fetch_win_records(int user_id) {
+    QVector<QPointF> data_points;
+
     QSqlQuery query;
-
-    QString updateQuery = "UPDATE blackjack_record "
-                          "SET money_balance = money_balance + :money_balance "
-                          "WHERE user_id = :user_id;";
-
-    query.prepare(updateQuery);
-    query.bindValue(":money_balance", money);
+    query.prepare("SELECT round_won, date_time FROM win_record WHERE user_id = :user_id");
     query.bindValue(":user_id", user_id);
 
     if (!query.exec()) {
-        qDebug() << "Error updating money balance: " << query.lastError();
-        return false;
+        qDebug() << "Error fetching win records: " << query.lastError();
+        return data_points;
     }
-    qDebug() << "Money balance updated successfully!";
-    return true;
+
+    while (query.next()) {
+        bool round_won = query.value("round_won").toBool();
+        QDateTime date_time = query.value("date_time").toDateTime();
+        int value = round_won ? 1 : 0;
+        data_points.append(QPointF(date_time.toMSecsSinceEpoch(), value));
+    }
+
+    return data_points;
 }
 
-QVector<QVariantMap> Database::get_records() {
-    QVector<QVariantMap> records;
+QMap<QDate, int> Database::fetch_total_money_per_day() {
+    QMap<QDate, int> money_per_day;
 
-    QSqlQuery query("SELECT * FROM blackjack_record;");
-    if (query.exec()) {
-        while (query.next()) {
-            QVariantMap record;
-            record["id"] = query.value("id").toInt();
-            record["user_id"] = query.value("user_id").toInt();
-            record["rounds_won"] = query.value("rounds_won").toInt();
-            record["rounds_lost"] = query.value("rounds_lost").toInt();
-            record["money_balance"] = query.value("money_balance").toInt();
-            records.append(record);
-        }
-    } else {
-        qDebug() << "Error fetching records: " << query.lastError();
+    QSqlQuery query;
+    query.prepare("SELECT DATE(date_time) AS day, SUM(money_won) AS total_money FROM money_record GROUP BY day");
+
+    if (!query.exec()) {
+        qDebug() << "Error fetching total money per day: " << query.lastError();
+        return money_per_day;
     }
 
-    return records;
+    while (query.next()) {
+        QDate day = query.value("day").toDate();
+        int total_money = query.value("total_money").toInt();
+        money_per_day.insert(day, total_money);
+    }
+
+    return money_per_day;
 }

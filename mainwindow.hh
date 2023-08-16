@@ -1,9 +1,11 @@
 #ifndef MAINWINDOW_HH
 #define MAINWINDOW_HH
 
-#include <game.hh>
-#include <account.hh>
-#include <database.hh>
+#include "game.hh"
+#include "account.hh"
+#include "database.hh"
+#include "statisticswindow.hh"
+#include "ui_statisticswindow.h"
 
 #include <QMainWindow>
 #include <QLabel>
@@ -47,14 +49,22 @@ private slots:
     void dealer_turn();
 
     /**
-     * @brief Set up players account
-     */
-    void set_up_account();
-
-    /**
      * @brief Take the money
      */
     void take_money();
+
+    /**
+     * @brief Open the statistics window
+     */
+    void open_stats_window();
+
+private:
+    Database *m_db;
+
+    /**
+     * @brief Set up players account
+     */
+    void set_up_account();
 
     /**
      * @brief Place the bet for the round
@@ -66,13 +76,30 @@ private slots:
      */
     void play();
 
-private:
-    Database *m_db;
-
+    /**
+     * @brief Set the UI up for a new round
+     */
     void set_up_UI();
-    void update_UI_cards(bool is_first_round);
+
+    /**
+     * @brief Update the images on the card image holders
+     * @param Bool value if it's the players turn
+     */
+    void update_UI_cards(bool is_players_turn);
+
+    /**
+     * @brief Update the values and UI outputs relating to the game status
+     */
     void update_UI_game_status();
+
+    /**
+     * @brief Update the players balance shown on UI
+     */
     void update_UI_balance();
+
+    /**
+     * @brief Load the images from the resources
+     */
     QPixmap load_pixmap_from_resource(const QString& file_path);
 
     Ui::MainWindow *ui;
@@ -91,7 +118,6 @@ private:
     QVector<QPoint> player_card_positions_;
 
     int bet_;
-    int inserted_money_;
 
     static const int NUM_CARD_HOLDERS = 10;
     static const int CARD_HOLDER_WIDTH = 200;
@@ -102,6 +128,7 @@ private:
 
     Game game_;
     Account account_;
+    StatisticsWindow statistics_window_;
 
 };
 #endif // MAINWINDOW_HH

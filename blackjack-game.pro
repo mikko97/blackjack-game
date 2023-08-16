@@ -1,4 +1,4 @@
-QT       += core gui sql
+QT       += core gui sql charts
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -18,7 +18,8 @@ SOURCES += \
     hand.cpp \
     main.cpp \
     mainwindow.cpp \
-    player.cpp
+    player.cpp \
+    statisticswindow.cpp
 
 HEADERS += \
     account.hh \
@@ -29,10 +30,12 @@ HEADERS += \
     game.hh \
     hand.hh \
     mainwindow.hh \
-    player.hh
+    player.hh \
+    statisticswindow.hh
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    statisticswindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

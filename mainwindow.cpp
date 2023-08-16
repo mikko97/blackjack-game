@@ -14,11 +14,12 @@
 #include <QInputDialog>
 #include <QMessageBox>
 
-MainWindow::MainWindow(Database *db, QWidget *parent)
-    : QMainWindow(parent)
-    , m_db(db)
-    , ui(new Ui::MainWindow)
-    , account_(db)
+MainWindow::MainWindow(Database *db, QWidget *parent) :
+    QMainWindow(parent),
+    m_db(db),
+    ui(new Ui::MainWindow),
+    account_(db),
+    statistics_window_(db)
 {
 
     QFont button_font1("Tahoma", 16, QFont::DemiBold);
@@ -155,6 +156,7 @@ MainWindow::MainWindow(Database *db, QWidget *parent)
     connect(new_round_button_, &QPushButton::clicked, this, &MainWindow::new_round);
     //connect(reset_button_, &QPushButton::clicked, this, &MainWindow::reset_game);
     connect(take_money_button_, &QPushButton::clicked, this, &MainWindow::take_money);
+    connect(stat_button_, &QPushButton::clicked, this, &MainWindow::open_stats_window);
 
     play();
 }
@@ -230,17 +232,6 @@ void MainWindow::new_round() {
         update_UI_cards(true);
     }
     update_UI_game_status();
-
-    QVector<QVariantMap> records = m_db->get_records();
-
-    // Print fetched records
-    for (const auto &record : records) {
-        qDebug() << "Record ID:" << record["id"].toInt();
-        qDebug() << "User ID:" << record["user_id"].toInt();
-        qDebug() << "Rounds Won:" << record["rounds_won"].toInt();
-        qDebug() << "Rounds Lost:" << record["rounds_lost"].toInt();
-        qDebug() << "Money Balance:" << record["money_balance"].toInt();
-    }
 }
 
 /*
@@ -299,7 +290,7 @@ void MainWindow::dealer_turn() {
     update_UI_game_status();
 }
 
-void MainWindow::update_UI_cards(bool is_first_round) {
+void MainWindow::update_UI_cards(bool is_players_turn) {
     const std::vector<std::unique_ptr<Card>>& dealer_hand = game_.get_dealer_hand();
     const std::vector<std::unique_ptr<Card>>& player_hand = game_.get_player_hand();
 
@@ -308,7 +299,7 @@ void MainWindow::update_UI_cards(bool is_first_round) {
         if(i>NUM_CARD_HOLDERS-1) {
             i=NUM_CARD_HOLDERS-1;
         }
-        if(is_first_round and i==1) {
+        if(is_players_turn and i==1) {
             QString card_image_path = QString(":/cards/backside.png");
             QPixmap pixmap = load_pixmap_from_resource(card_image_path);
             dealer_card_holders_.at(i)->setPixmap(pixmap.scaled(dealer_card_holders_.at(0)->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
@@ -357,7 +348,7 @@ void MainWindow::update_UI_game_status() {
         textbox1_->setText(text);
         account_.add_balance(bet_);
         account_.empty_bet();
-        m_db->update_rounds_won(1,1);
+        m_db->add_win_record(1,true);
         if(account_.get_balance()>0) {
             take_money_button_->setEnabled(true);
         }
@@ -382,7 +373,7 @@ void MainWindow::update_UI_game_status() {
         textbox1_->setText(text);
         account_.decrease_balance(bet_);
         account_.empty_bet();
-        m_db->update_rounds_lost(1,1);
+        m_db->add_win_record(1,false);
         if(account_.get_balance()>0) {
             take_money_button_->setEnabled(true);
         }
@@ -423,6 +414,10 @@ QPixmap MainWindow::load_pixmap_from_resource(const QString& file_path) {
     }
 
     return pixmap;
+}
+
+void MainWindow::open_stats_window() {
+    statistics_window_.show();
 }
 
 void MainWindow::play() {

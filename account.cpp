@@ -12,8 +12,7 @@ Account::~Account()
 void Account::set_up_account(int money) {
     empty_account();
     add_balance(money);
-    m_db->update_money_balance(1, -money);
-
+    first_data_point_ = -money;
 }
 
 int Account::get_balance() {
@@ -30,7 +29,9 @@ void Account::decrease_balance(int money) {
 
 void Account::withdraw_money(int money) {
     empty_account();
-    m_db->update_money_balance(1, money);
+    second_data_point_ = money;
+    money_won_ = second_data_point_ + first_data_point_;
+    m_db->add_money_record(1, money_won_);
 }
 
 void Account::empty_account() {
