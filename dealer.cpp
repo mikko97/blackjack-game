@@ -18,6 +18,7 @@ void Dealer::draw_new_card() {
 }
 
 void Dealer::make_move() {
+    // Draw cards until the dealers threshold to stay is reached
     while(hand_->calculate_points()<DEALER_THRESHOLD) {
         draw_new_card();
     }

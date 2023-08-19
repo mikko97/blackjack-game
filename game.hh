@@ -98,6 +98,12 @@ public:
      */
     void reset_game();
 
+    /**
+     * @brief Get the number of cards left in the deck
+     * @return The number of cards left
+     */
+    int get_deck_size();
+
 
 private:
     /**

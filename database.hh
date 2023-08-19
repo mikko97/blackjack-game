@@ -70,6 +70,18 @@ public:
      */
     QMap<QDateTime, int> fetch_total_money_per_day();
 
+    /**
+     * @brief Fetch total games won per day
+     * @return Qmap, which has the day as key and the total rounds won as value
+     */
+    QMap<QDateTime, int> fetch_total_wins_per_day();
+
+    /**
+     * @brief Fetch total games lost per day
+     * @return Qmap, which has the day as key and the total rounds lost as value
+     */
+    QMap<QDateTime, int> fetch_total_losses_per_day();
+
 private:
     QSqlDatabase m_db;
 };

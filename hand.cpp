@@ -35,6 +35,8 @@ int Hand::calculate_points() const{
         }
     }
 
+    // If ace is dealt and points go over 21,
+    // then the value of ace becomes 1
     if (ace_count > 0 and total_points > BLACKJACK_THRESHOLD) {
         total_points -= ACE_POINTS-1;
     }
@@ -54,10 +56,14 @@ int Hand::calculate_secondary_points() const {
         }
     }
 
+    // If ace is dealt and points are less than 21,
+    // then return the points where the value of the ace is 1
+    // These points will become the secondary points of the player
     if (ace_count > 0 and total_points < BLACKJACK_THRESHOLD) {
         return total_points-ACE_POINTS+1;
     }
 
+    // Otherwise return the normal points
     return calculate_points();
 }
 

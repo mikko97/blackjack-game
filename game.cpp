@@ -28,6 +28,7 @@ void Game::initial_draw() {
     dealer_->initial_draw();
     player_->initial_draw();
 
+    // Determine the winner if blackjacks occur after the initial draw of cards
     if(is_blackjack_player() and is_blackjack_dealer()) {
         tie_ = true;
         round_over_ = true;
@@ -134,5 +135,7 @@ void Game::reset_game() {
     dealer_ = std::make_unique<Dealer>(*deck_);
 }
 
-
+int Game::get_deck_size() {
+    return deck_->get_deck_size();
+}
 

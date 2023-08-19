@@ -19,10 +19,10 @@ int Card::get_suit() const {
 
 int Card::get_points() const {
     if (value_ == 1) {
-        return 11;
+        return 11;  // Ace
     } else if (value_ >= 2 and value_ <= 10) {
-        return value_;
+        return value_;  // Normal cards from 2 to 10
     } else {
-        return 10;
+        return 10;  // Jack, queen and king
     }
 }

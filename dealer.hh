@@ -31,7 +31,7 @@ public:
     void draw_new_card();
 
     /**
-     * @brief Make the moves after the initial draw of cards
+     * @brief Make the dealers moves after the initial draw of cards
      */
     void make_move();
 

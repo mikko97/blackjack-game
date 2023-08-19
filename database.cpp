@@ -126,7 +126,6 @@ QMap<QDateTime, int> Database::fetch_total_money_per_day() {
 
     QSqlQuery query;
     query.prepare("SELECT DATE(date_time) AS day, SUM(money_won) AS total_money FROM money_record GROUP BY day");
-    //query.prepare("SELECT date_time, SUM(money_won) AS total_money FROM money_record GROUP BY day");
 
     if (!query.exec()) {
         qDebug() << "Error fetching total money per day: " << query.lastError();
@@ -141,3 +140,54 @@ QMap<QDateTime, int> Database::fetch_total_money_per_day() {
 
     return money_per_day;
 }
+
+QMap<QDateTime, int> Database::fetch_total_wins_per_day() {
+    QMap<QDateTime, int> wins;
+
+    QSqlQuery query;
+    query.prepare("SELECT DATE(date_time) as day, count(*) as total_rounds_won "
+                        "FROM win_record "
+                        "WHERE round_won = 1 "
+                        "GROUP BY day");
+
+    if (query.exec()) {
+        while (query.next()) {
+            QDateTime date_time = query.value("day").toDateTime();
+            int total_rounds_won = query.value("total_rounds_won").toInt();
+            wins.insert(date_time, total_rounds_won);
+        }
+    }
+
+    else {
+        qDebug() << "Error fetching total games won per day: " << query.lastError();
+    }
+
+    return wins;
+}
+
+QMap<QDateTime, int> Database::fetch_total_losses_per_day() {
+    QMap<QDateTime, int> losses;
+
+    QSqlQuery query;
+    query.prepare("SELECT DATE(date_time) as day, count(*) as total_rounds_lost "
+                        "FROM win_record "
+                        "WHERE round_won = 0 "
+                        "GROUP BY day");
+
+    if (query.exec()) {
+        while (query.next()) {
+            QDateTime date_time = query.value("day").toDateTime();
+            int total_rounds_lost = query.value("total_rounds_lost").toInt();
+            losses.insert(date_time, total_rounds_lost);
+        }
+    }
+
+    else {
+        qDebug() << "Error fetching total games won per day: " << query.lastError();
+    }
+
+    return losses;
+}
+
+
+

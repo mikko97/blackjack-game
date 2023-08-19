@@ -21,6 +21,7 @@
 #include <QApplication>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QProgressBar>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -44,22 +45,24 @@ protected:
 private slots:
 
     /**
-     * @brief Start a new round
+     * @brief Handles the event when the "New round" button is pressed
+     *        to start the new round of blackjack.
      */
-    void new_round();
+    void on_new_round_button_pressed();
 
     /**
-     * @brief Start a new game
+     * @brief Start a new game.
      */
     //void reset_game();
 
     /**
-     * @brief Handles the event when the "Hit" button is pressed.
+     * @brief Handles the event when the "Hit" button is pressed
+     *        to draw a card for the player.
      */
     void on_hit_button_pressed();
 
     /**
-     * @brief Trigger the dealer's turn
+     * @brief Trigger the dealer's turn.
      */
     void dealer_turn();
 
@@ -71,7 +74,7 @@ private slots:
 
     /**
      * @brief Handles the event when the "Statistics" button is pressed
-     *        to open the statistics window
+     *        to open the statistics window.
      */
     void on_statistics_button_pressed();
 
@@ -108,19 +111,48 @@ private:
     void update_UI_game_status();
 
     /**
+     * @brief Update the values and UI outputs if player won
+     */
+    void update_UI_player_won(int player_score, int dealer_score);
+
+    /**
+     * @brief Update the values and UI outputs if dealer won
+     */
+    void update_UI_dealer_won(int player_score, int dealer_score);
+
+    /**
+     * @brief Update the values and UI outputs if game is tie
+     */
+    void update_UI_tie();
+
+    /**
+     * @brief Update the values and UI outputs if game is ongoing
+     */
+    void update_UI_ongoing(int player_score, int player_secondary_score);
+
+    /**
      * @brief Update the players balance shown on UI
      */
     void update_UI_balance();
 
     /**
+     * @brief Switch the enabled states of buttons
+     * @param enable - Bool value whether to enable or disable a button
+     * @param button_names - Vector of names of buttons, which states will be switched
+     */
+    void switch_button_enabled(bool enable, std::vector<std::string> button_names);
+
+    /**
      * @brief Load the images from the resources
      * @param File path to the images
+     * @return File path to the images
      */
     QPixmap load_pixmap_from_resource(const QString& file_path);
 
     Database *m_db;
     Ui::MainWindow *ui;
 
+    QVector<QPushButton*> buttons_;
     QPushButton* hit_button_;
     QPushButton* stay_button_;
     QPushButton* new_round_button_;
@@ -128,6 +160,7 @@ private:
     QPushButton* withdraw_money_button_;
     QTextBrowser* textbox1_;
     QTextBrowser* textbox2_;
+    QProgressBar* deck_bar_;
 
     QVector<QLabel*> dealer_card_holders_;
     QVector<QLabel*> player_card_holders_;

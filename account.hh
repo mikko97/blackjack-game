@@ -8,6 +8,7 @@ class Account
 public:
     /**
      * @brief Account constructor
+     * @param Pointer to the database object
      */
     Account(Database *db);
 
@@ -30,19 +31,19 @@ public:
 
     /**
      * @brief Add account balance
-     * @param money to be added to the account
+     * @param Money to be added to the account
      */
     void add_balance(int money);
 
     /**
      * @brief Decrease account balance
-     * @param money to be decreased from the account
+     * @param Money to be decreased from the account
      */
     void decrease_balance(int money);
 
     /**
      * @brief Withdraw money from the account
-     * @param money to be withdrawed from the account
+     * @param Money to be withdrawed from the account
      */
     void withdraw_money(int money);
 
@@ -62,8 +63,8 @@ public:
     void empty_bet();
 
     /**
-     * @brief Place the players bet
-     * @return bool value
+     * @brief Check if player has placed a bet
+     * @return True or false
      */
     bool is_bet_placed();
 

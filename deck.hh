@@ -46,6 +46,12 @@ public:
      */
     std::vector<std::unique_ptr<Card>>& get_deck();
 
+    /**
+     * @brief Get the number of cards left in the deck
+     * @return The number of cards left
+     */
+    int get_deck_size();
+
 private:
     static const int DECK_SIZE = 52;
     static const int NUMBER_OF_DECKS = 5;

@@ -16,6 +16,7 @@
 #include <QDateTimeAxis>
 #include <QValueAxis>
 #include <QBarCategoryAxis>
+#include <QLabel>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class StatisticsWindow; }
@@ -33,15 +34,27 @@ public:
      */
     void load_money_data();
 
+    /**
+     * @brief Load the data related to users games
+     */
+    void load_game_data();
+
 private:
     Database *m_db;
     Ui::StatisticsWindow *ui;
-    QtCharts::QChartView *chart_view_;
-    QtCharts::QBarSet *bar_set_;
-    QtCharts::QBarSeries *bar_series_;
-    QtCharts::QLineSeries *line_series_;
-    QStringList categories_;
-    QtCharts::QChart *chart_;
+
+    QtCharts::QChart *chart_money_;
+    QtCharts::QChartView *chart_view_money_;
+    QtCharts::QBarSeries *bar_series_money_;
+    QStringList categories_money_;
+
+    QtCharts::QChart *chart_games_;
+    QtCharts::QChartView *chart_view_games_;
+    QtCharts::QBarSeries *bar_series_games_;
+    QStringList categories_games_;
+
+    QLabel *total_money_label_;
+    QLabel *total_rounds_label_;
 };
 
 #endif // STATISTICSWINDOW_HH
