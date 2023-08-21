@@ -22,6 +22,10 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QProgressBar>
+#include <QTimer>
+#include <thread>
+#include <chrono>
+#include <QGraphicsDropShadowEffect>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -106,6 +110,24 @@ private:
     void update_UI_cards(bool is_players_turn);
 
     /**
+     * @brief Display players cards
+     */
+    void display_player_cards();
+
+    /**
+     * @brief Display dealers cards
+     * @param Bool value if it's the players turn
+     */
+    void display_dealer_cards(bool is_players_turn);
+
+    /**
+     * @brief Animate the displaying of cards
+     * @param card - card to be animated
+     * @param end_pos - End position of the cards movement
+     */
+    void animate_card(QLabel* card, const QPoint& end_pos);
+
+    /**
      * @brief Update the values and UI outputs relating to the game status
      */
     void update_UI_game_status();
@@ -119,6 +141,11 @@ private:
      * @brief Update the values and UI outputs if dealer won
      */
     void update_UI_dealer_won(int player_score, int dealer_score);
+
+    /**
+     * @brief Data and UI related updates, that take place after every round
+     */
+    void updates_after_round(bool player_won);
 
     /**
      * @brief Update the values and UI outputs if game is tie
@@ -149,6 +176,12 @@ private:
      */
     QPixmap load_pixmap_from_resource(const QString& file_path);
 
+    /**
+     * @brief Crop the image of the deck to simulate the gradual diminishing
+     *        of the deck during the game.
+     */
+    void crop_deck_image();
+
     Database *m_db;
     Ui::MainWindow *ui;
 
@@ -160,14 +193,18 @@ private:
     QPushButton* withdraw_money_button_;
     QTextBrowser* textbox1_;
     QTextBrowser* textbox2_;
-    QProgressBar* deck_bar_;
 
+    QPixmap deck_pixmap_;
+    QLabel* deck_holder_;
     QVector<QLabel*> dealer_card_holders_;
-    QVector<QLabel*> player_card_holders_;
     QVector<QPoint> dealer_card_positions_;
+    QVector<QLabel*> player_card_holders_;
     QVector<QPoint> player_card_positions_;
+    std::vector<bool> are_player_cards_animated_;
+    std::vector<bool> are_dealer_cards_animated_;
 
     int bet_;
+    int cards_left_ = 260;
 
     static const int NUM_CARD_HOLDERS = 10;
     static const int CARD_HOLDER_WIDTH = 200;
@@ -175,6 +212,21 @@ private:
     static const int BUTTON_WIDTH = 200;
     static const int BUTTON_HEIGHT = 100;
     static const int BLACKJACK_THRESHOLD = 21;
+
+    inline static const QString GAME_INSTRUCTION = "\n\nPress 'Hit' to draw new card\nPress 'Stay' to stay";
+    inline static const QString NEW_ROUND_INSTRUCTION = "Press the 'New round'-button to start the game";
+    inline static const QString PLAYER_WON = "You won!\n";
+    inline static const QString PLAYER_GOT_BLACKJACK = "You got blackjack!\n";
+    inline static const QString PLAYER_WENT_BUST = "You went bust!";
+    inline static const QString DEALER_WON = "Dealer won! \n";
+    inline static const QString DEALER_GOT_BLACKJACK = "Dealer got blackjack!\n";
+    inline static const QString DEALER_WENT_BUST = "Dealer went bust!";
+    inline static const QString BOTH_GOT_BLACKJACK = "You both got blackjack!\n";
+    inline static const QString GAME_IS_TIE = "It's a tie!\nYou both got blackjack!";
+    inline static const QString ACCOUNT_DEPOSIT = "Enter money to your account";
+    inline static const QString PLACE_BET = "Place your bet";
+
+
 
     Game game_;
     Account account_;

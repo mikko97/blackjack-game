@@ -15,7 +15,7 @@ StatisticsWindow::StatisticsWindow(Database *db, QWidget *parent) :
     total_money_label_ = new QLabel(this);
     total_money_label_->setFont(right_layout_font);
     total_money_label_->setStyleSheet("padding: 22px; color: white; border-style: dashed; border-width: 8px; border-color: white");
-    load_money_data();
+    load_money_data();  // Load data to the money chart
 
     chart_money_ = new QtCharts::QChart();
     chart_money_->addSeries(bar_series_money_);
@@ -44,7 +44,7 @@ StatisticsWindow::StatisticsWindow(Database *db, QWidget *parent) :
     total_rounds_label_ = new QLabel(this);
     total_rounds_label_->setStyleSheet("padding: 22px; color: white; border-style: dashed; border-width: 8px; border-color: white");
     total_rounds_label_->setFont(right_layout_font);
-    load_game_data();
+    load_game_data();   // Load data to the game chart
 
     chart_games_ = new QtCharts::QChart();
     chart_games_->addSeries(bar_series_games_);
@@ -87,6 +87,8 @@ StatisticsWindow::StatisticsWindow(Database *db, QWidget *parent) :
 }
 
 void StatisticsWindow::load_money_data() {
+    categories_money_.clear();
+    bar_series_money_->clear();
     QMap<QDateTime, int> money_per_day = m_db->fetch_total_money_per_day();
     QtCharts::QBarSet *set_money_won = new QtCharts::QBarSet("Money won");
     QtCharts::QBarSet *set_money_lost = new QtCharts::QBarSet("Money lost");
@@ -115,6 +117,8 @@ void StatisticsWindow::load_money_data() {
 }
 
 void StatisticsWindow::load_game_data() {
+    categories_games_.clear();
+    bar_series_games_->clear();
     QMap<QDateTime, int> wins_per_day = m_db->fetch_total_wins_per_day();
     QMap<QDateTime, int> losses_per_day = m_db->fetch_total_losses_per_day();
     QtCharts::QBarSet *set_won = new QtCharts::QBarSet("Rounds won");

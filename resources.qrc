@@ -53,5 +53,9 @@
         <file>cards/9_3.png</file>
         <file>cards/9_4.png</file>
         <file>cards/backside.png</file>
+        <file>cards/backside_3.png</file>
+        <file>cards/backside_4.png</file>
+        <file>cards/backside_5.png</file>
+        <file>cards/backside_6.png</file>
     </qresource>
 </RCC>
