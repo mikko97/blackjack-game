@@ -9,19 +9,28 @@ Dealer::~Dealer()
 {
 }
 
-void Dealer::initial_draw() {
-    hand_->initial_draw();
+bool Dealer::initial_draw() {
+    if(!hand_->initial_draw()) {
+        return false;
+    }
+    return true;
 }
 
-void Dealer::draw_new_card() {
-    hand_->draw_new_card();
+bool Dealer::draw_new_card() {
+    if(!hand_->draw_new_card()) {
+        return false;
+    }
+    return true;
 }
 
-void Dealer::make_move() {
+bool Dealer::make_move() {
     // Draw cards until the dealers threshold to stay is reached
     while(hand_->calculate_points()<DEALER_THRESHOLD) {
-        draw_new_card();
+        if(!draw_new_card()) {
+            return false;
+        }
     }
+    return true;
 }
 
 const std::vector<std::unique_ptr<Card>>& Dealer::get_hand() const {

@@ -19,9 +19,21 @@ public:
     ~Game();
 
     /**
-     * @brief play
+     * @brief Reset parameters for new round of blackjack
      */
     void new_round();
+
+    /**
+     * @brief New round for player
+     * @return bool value if initial draw was succesful
+     */
+    bool new_round_player();
+
+    /**
+     * @brief New round for dealer
+     * @return bool value if initial draw was succesfu
+     */
+    bool new_round_dealer();
 
     /**
      * @brief Get the hand of the player
@@ -61,13 +73,15 @@ public:
 
     /**
      * @brief Dealers turn to play
+     * @return Bool value if deck has cards left to draw
      */
-    void dealer_turn();
+    bool dealer_turn();
 
     /**
      * @brief Players drawing of a card
+     * @return Bool value if deck has cards left to draw
      */
-    void player_hit();
+    bool player_hit();
 
     /**
      * @brief Check if player has blackjack
@@ -104,12 +118,13 @@ public:
      */
     int get_deck_size();
 
+    /**
+     * @brief Create a new deck
+     */
+    void create_new_deck();
+
 
 private:
-    /**
-     * @brief Draw the initial cards for player and dealer
-     */
-    void initial_draw();
 
     /**
      * @brief Determine the winner of the game

@@ -35,20 +35,6 @@ public:
     bool create_tables();
 
     /**
-     * @brief Fetch the money records of the user
-     * @param int user_id
-     * @return Vector containing the data
-     */
-    QVector<QPointF> fetch_money_records(int user_id);
-
-    /**
-     * @brief Fetch the winning records of the user
-     * @param int user_id
-     * @return Vector containing the data
-     */
-    QVector<QPointF> fetch_win_records(int user_id);
-
-    /**
      * @brief Fetch the winning records of the user
      * @param int user_id
      * @param bool round_won
@@ -65,22 +51,52 @@ public:
     bool add_money_record(int user_id, int money_won);
 
     /**
-     * @brief Fetch total money won per day
-     * @return Qmap, which has the day as key and the total money won as value
-     */
-    QMap<QDateTime, int> fetch_total_money_per_day();
-
-    /**
      * @brief Fetch total games won per day
      * @return Qmap, which has the day as key and the total rounds won as value
      */
-    QMap<QDateTime, int> fetch_total_wins_per_day();
+    //QMap<QDateTime, int> fetch_total_wins_per_day();
 
     /**
      * @brief Fetch total games lost per day
      * @return Qmap, which has the day as key and the total rounds lost as value
      */
-    QMap<QDateTime, int> fetch_total_losses_per_day();
+    //QMap<QDateTime, int> fetch_total_losses_per_day();
+
+    /**
+     * @brief Fetch money won last week
+     * @return Qmap, which has the day as key and the money won as value
+     */
+    QMap<QDateTime, int> fetch_money_won_last_week();
+
+    /**
+     * @brief Fetch total money won all time
+     * @return The amount of money won
+     */
+    int fetch_total_money_all_time();
+
+    /**
+     * @brief Fetch total wins last week
+     * @return Qmap, which has the day as key and the rounds won as value
+     */
+    QMap<QDateTime, int> fetch_wins_last_week();
+
+    /**
+     * @brief Fetch total losses last week
+     * @return Qmap, which has the day as key and the rounds lost as value
+     */
+    QMap<QDateTime, int> fetch_losses_last_week();
+
+    /**
+     * @brief Fetch total rounds won all time
+     * @return The amount of rounds won
+     */
+    int fetch_total_wins_all_time();
+
+    /**
+     * @brief Fetch total rounds lost all time
+     * @return The amount of rounds lost
+     */
+    int fetch_total_losses_all_time();
 
 private:
     QSqlDatabase m_db;

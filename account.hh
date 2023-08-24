@@ -31,21 +31,18 @@ public:
 
     /**
      * @brief Add account balance
-     * @param Money to be added to the account
      */
-    void add_balance(int money);
+    void add_balance();
 
     /**
      * @brief Decrease account balance
-     * @param Money to be decreased from the account
      */
-    void decrease_balance(int money);
+    void decrease_balance();
 
     /**
      * @brief Withdraw money from the account
-     * @param Money to be withdrawed from the account
      */
-    void withdraw_money(int money);
+    void withdraw_money();
 
     /**
      * @brief Empty the players account
@@ -54,8 +51,9 @@ public:
 
     /**
      * @brief Place the players bet
+     * @param money - The bet user placed
      */
-    void place_bet();
+    void place_bet(int money);
 
     /**
      * @brief Take the players bet off
@@ -68,11 +66,16 @@ public:
      */
     bool is_bet_placed();
 
+    /**
+     * @brief Get the bet that user has placed
+     * @return The bet
+     */
+    int get_bet();
+
 private:
     int balance_ = 0;
     int bet_;
-    int first_data_point_;
-    int second_data_point_;
+    int money_deposited_;
     int money_won_;
     bool bet_placed_ = false;
     Database *m_db;

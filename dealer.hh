@@ -22,18 +22,20 @@ public:
 
     /**
      * @brief Initial draw of the first 2 cards
+     * @return Bool value if deck has 2 cards left to draw
      */
-    void initial_draw();
+    bool initial_draw();
 
     /**
      * @brief Draw 1 additional card
+     * @return Bool value if deck has 2 cards left to draw
      */
-    void draw_new_card();
+    bool draw_new_card();
 
     /**
      * @brief Make the dealers moves after the initial draw of cards
      */
-    void make_move();
+    bool make_move();
 
     /**
      * @brief Get the hand which holds the current cards dealt

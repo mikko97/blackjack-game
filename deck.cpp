@@ -1,5 +1,5 @@
 #include "deck.hh"
-
+#include <QDebug>
 Deck::Deck()
 {
     new_deck();

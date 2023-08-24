@@ -9,12 +9,18 @@ Player::~Player()
 {
 }
 
-void Player::initial_draw() {
-    hand_->initial_draw();
+bool Player::initial_draw() {
+    if(!hand_->initial_draw()) {
+        return false;
+    }
+    return true;
 }
 
-void Player::draw_new_card() {
-    hand_->draw_new_card();
+bool Player::draw_new_card() {
+    if(!hand_->draw_new_card()) {
+        return false;
+    }
+    return true;
 }
 
 const std::vector<std::unique_ptr<Card>>& Player::get_hand() const {

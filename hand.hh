@@ -22,13 +22,15 @@ public:
 
     /**
      * @brief Initial draw of the first 2 cards
+     * @return Bool value if deck has cards left to draw
      */
-    void initial_draw();
+    bool initial_draw();
 
     /**
      * @brief Draw 1 additional card
+     * @return Bool value if deck has cards left to draw
      */
-    void draw_new_card();
+    bool draw_new_card();
 
     /**
      * @brief Get the hand which holds the current cards dealt

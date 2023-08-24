@@ -107,7 +107,7 @@ private:
      * @brief Update the images on the card image holders
      * @param Bool value if it's the players turn
      */
-    void update_UI_cards(bool is_players_turn);
+    void update_UI_cards(bool is_players_turn, bool is_round_over);
 
     /**
      * @brief Display players cards
@@ -121,11 +121,30 @@ private:
     void display_dealer_cards(bool is_players_turn);
 
     /**
-     * @brief Animate the displaying of cards
-     * @param card - card to be animated
-     * @param end_pos - End position of the cards movement
+     * @brief Animate the card from deck to hand
+     * @param card - reference to the card to be animated
+     * @param end_position - End position of the cards movement
      */
-    void animate_card(QLabel* card, const QPoint& end_pos);
+    void animate_card_to_hand(QLabel* card, const QPoint& end_position);
+
+    /**
+     * @brief Animate the card from hand to deck
+     * @param card - reference to the card to be animated
+     * @param end_position - End position of the cards movement
+     */
+    void animate_card_to_deck(QLabel* card, const QPoint& end_position);
+
+    /**
+     * @brief Reset card position after the animation from hand to deck
+     * @param reference to the card
+     * @param original_position - Original position of the card
+     */
+    void reset_card_position(QLabel* card, QPoint original_position);
+
+    /**
+     * @brief Animate the shuffling of cards
+     */
+    void animate_deck_shuffle();
 
     /**
      * @brief Update the values and UI outputs relating to the game status
@@ -178,9 +197,22 @@ private:
 
     /**
      * @brief Crop the image of the deck to simulate the gradual diminishing
-     *        of the deck during the game.
+     *        of the deck of unused cards during the game.
      */
-    void crop_deck_image();
+    void decrease_deck_image();
+
+    /**
+     * @brief Add to the image of the deck to simulate the gradual growing
+     *        of the deck of used cards during the game.
+     */
+    void increase_deck_image();
+
+    /**
+     * @brief Create the layout and the labels for the playing cards
+     * @param is_players_cards - If created for player or dealer
+     * @return The layout created
+     */
+    QHBoxLayout* create_card_labels(bool is_players_cards);
 
     Database *m_db;
     Ui::MainWindow *ui;
@@ -194,18 +226,21 @@ private:
     QTextBrowser* textbox1_;
     QTextBrowser* textbox2_;
 
-    QPixmap deck_pixmap_;
-    QLabel* deck_holder_;
+    QLabel* used_deck_label_;
+    QLabel* unused_deck_label_;
+    QPixmap used_deck_pixmap_;
+    QPixmap unused_deck_pixmap_;
+
     QVector<QLabel*> dealer_card_holders_;
     QVector<QPoint> dealer_card_positions_;
+    std::vector<bool> are_dealer_cards_animated_;
     QVector<QLabel*> player_card_holders_;
     QVector<QPoint> player_card_positions_;
     std::vector<bool> are_player_cards_animated_;
-    std::vector<bool> are_dealer_cards_animated_;
 
-    int bet_;
-    int cards_left_ = 260;
+    int cards_left_ = NUM_CARDS_IN_DECK;
 
+    static const int NUM_CARDS_IN_DECK = 260;
     static const int NUM_CARD_HOLDERS = 10;
     static const int CARD_HOLDER_WIDTH = 200;
     static const int CARD_HOLDER_HEIGHT = 300;
@@ -225,8 +260,7 @@ private:
     inline static const QString GAME_IS_TIE = "It's a tie!\nYou both got blackjack!";
     inline static const QString ACCOUNT_DEPOSIT = "Enter money to your account";
     inline static const QString PLACE_BET = "Place your bet";
-
-
+    inline static const QString EXIT_MESSAGE = "Are you sure you want to exit?\nYour current money left will be withdrawed.";
 
     Game game_;
     Account account_;

@@ -21,47 +21,9 @@ MainWindow::MainWindow(Database *db, QWidget *parent) :
     // Create the main layout for the central widget
     QVBoxLayout* main_layout = new QVBoxLayout(central_widget);
 
-    // Create the dealers group of labels for the cards
-    QString card_image_path = QString(":/cards/backside_5.png");
-    deck_pixmap_ = load_pixmap_from_resource(card_image_path);
-    QHBoxLayout* dealer_layout = new QHBoxLayout;
-    for (int i = 0; i < NUM_CARD_HOLDERS; ++i)
-    {
-        QLabel* label = new QLabel(this);
-        label->setFixedSize(CARD_HOLDER_WIDTH, CARD_HOLDER_HEIGHT);
-        label->setPixmap(QPixmap());
-        label->setStyleSheet("background-color: transparent");
-        dealer_layout->addWidget(label);
-
-        // Create the deck
-        if(i==NUM_CARD_HOLDERS - 1) {
-            deck_holder_ = label;
-            deck_holder_->setPixmap(deck_pixmap_.scaled(dealer_card_holders_.at(0)->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-            QGraphicsDropShadowEffect *shadow = new QGraphicsDropShadowEffect;
-            shadow->setBlurRadius(50);
-            shadow->setOffset(10);
-            label->setGraphicsEffect(shadow);
-        }
-        // Create the group of labels for dealers playing cards
-        else {
-            dealer_card_holders_.append(label);
-            dealer_card_positions_.append(label->pos());
-        }
-    }
-
-    // Create the players group of labels for the cards
-    QHBoxLayout* player_layout = new QHBoxLayout;
-    for (int i = 0; i < NUM_CARD_HOLDERS; ++i)
-    {
-        QLabel* label = new QLabel(this);
-        label->setFixedSize(CARD_HOLDER_WIDTH, CARD_HOLDER_HEIGHT);
-        label->setPixmap(QPixmap());
-        label->setStyleSheet("background-color: transparent");
-
-        player_layout->addWidget(label);
-        player_card_holders_.append(label);
-        player_card_positions_.append(label->pos());
-    }
+    // Create the layouts for the playing cards
+    QHBoxLayout* player_layout = create_card_labels(true);
+    QHBoxLayout* dealer_layout = create_card_labels(false);
 
     // Create a horizontal layout for Hit, Stay and Withdraw buttons
     QHBoxLayout* upper_button_layout = new QHBoxLayout;
@@ -172,6 +134,48 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+QHBoxLayout *MainWindow::create_card_labels(bool is_players_cards) {
+    QString card_image_path = QString(":/cards/backside_5.png");
+    unused_deck_pixmap_ = load_pixmap_from_resource(card_image_path);
+
+    QHBoxLayout* layout = new QHBoxLayout;
+    for (int i = 0; i < NUM_CARD_HOLDERS; ++i)
+    {
+        // Create the label for the playing card
+        QLabel* label = new QLabel(this);
+        label->setFixedSize(CARD_HOLDER_WIDTH, CARD_HOLDER_HEIGHT);
+        label->setPixmap(QPixmap());
+        label->setStyleSheet("background-color: transparent");
+        layout->addWidget(label);
+
+        // Create the label for the used and unused decks
+        if(i==NUM_CARD_HOLDERS - 1) {
+            if(is_players_cards) {
+                used_deck_label_ = label;
+                used_deck_label_->setPixmap(used_deck_pixmap_.scaled(player_card_holders_.at(0)->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            }
+            else {
+                unused_deck_label_ = label;
+                unused_deck_label_->setPixmap(unused_deck_pixmap_.scaled(dealer_card_holders_.at(0)->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            }
+        }
+
+        // Add the created labels of playing cards to their own groups
+        else {
+            if(is_players_cards) {
+                player_card_holders_.append(label);
+                player_card_positions_.append(label->pos());
+            }
+            else {
+                dealer_card_holders_.append(label);
+                dealer_card_positions_.append(label->pos());
+            }
+        }
+    }
+    return layout;
+}
+
+
 void MainWindow::set_up_account() {
     // Ask player for the sum they want to deposit to their account
     bool ok;
@@ -191,7 +195,7 @@ void MainWindow::on_withdraw_button_pressed() {
     // Withdraw players money, disable the withdraw button and update UI
     switch_button_enabled(false, {"Withdraw"});
     int money_taken = account_.get_balance();
-    account_.withdraw_money(money_taken);
+    account_.withdraw_money();
     statistics_window_.load_money_data();
 
     QString text = "You withdraw " + QString::number(money_taken) + "$\n";
@@ -203,30 +207,32 @@ void MainWindow::place_bet() {
     // Ask player for their bet and place the bet
     int max_bet = account_.get_balance();
     bool ok;
-    bet_ = QInputDialog::getInt(nullptr, "Bet", PLACE_BET, 1, 1, max_bet, 1, &ok);
+    int bet = QInputDialog::getInt(nullptr, "Bet", PLACE_BET, 1, 1, max_bet, 1, &ok);
 
     // Ask again for the player to set the bet, if they close the dialog
     if(!ok) {
         place_bet();
     }
     else {
-        account_.place_bet();
+        account_.place_bet(bet);
     }
 }
 
 void MainWindow::update_UI_balance() {
     // Update money related data shown on UI
     int balance = account_.get_balance();
+    int bet = account_.get_bet();
     QString text = "Your balance: " + QString::number(balance) + "$";
 
     if(account_.is_bet_placed()) {
-        text += "\nYour bet: " + QString::number(bet_) + "$";
+        text += "\nYour bet: " + QString::number(bet) + "$";
     }
     textbox2_->setText(text);
 }
 
 void MainWindow::on_new_round_button_pressed() {
     // Set up the requirements for a new round of blackjack and initiate the round
+    account_.empty_bet();
     set_up_UI();
     if(account_.get_balance()==0) {
         set_up_account();
@@ -238,6 +244,17 @@ void MainWindow::on_new_round_button_pressed() {
 
     place_bet();
     game_.new_round();
+    textbox1_->setText("");
+
+    if(!game_.new_round_player()) {
+        game_.create_new_deck();
+        game_.new_round_player();
+    }
+    if(!game_.new_round_dealer()) {
+        game_.create_new_deck();
+        game_.new_round_dealer();
+    }
+
     switch_button_enabled(true, {"Hit", "Stay"});
     switch_button_enabled(false, {"New round"});
 
@@ -245,22 +262,21 @@ void MainWindow::on_new_round_button_pressed() {
     // and reveal dealers initial cards
     if(game_.is_blackjack_player()) {
         switch_button_enabled(false, {"Hit", "Stay"});
-        update_UI_cards(false);
+        update_UI_cards(false, false);
     }
     else {
-        update_UI_cards(true);
+        update_UI_cards(true, false);
     }
     update_UI_game_status();
 }
 
 void MainWindow::set_up_UI() {
-    // Empty players bet, disable players buttons and update UI
-    account_.empty_bet();
+    // Disable players buttons and update UI
+    update_UI_cards(false, true);
     update_UI_balance();
     switch_button_enabled(false, {"Hit", "Stay", "Withdraw"});
-    textbox1_->setText(NEW_ROUND_INSTRUCTION);
 
-    // Set empty pixmaps to the card holders to clear the cards from screen
+    // Set empty pixmaps to the card holders to clear the images on the cards
     for(auto dealer_card_holder : qAsConst(dealer_card_holders_)) {
         dealer_card_holder->setPixmap(QPixmap());
     }
@@ -271,14 +287,19 @@ void MainWindow::set_up_UI() {
 
 void MainWindow::on_hit_button_pressed() {
     // Draw card for player and update UI
-    game_.player_hit();
-    update_UI_cards(true);
+    // If no no cards left in deck, create a new deck
+    if(!game_.player_hit()) {
+        game_.create_new_deck();
+        game_.player_hit();
+    }
+    update_UI_cards(true, false);
     update_UI_game_status();
 
     // If player gets blackjack, initiate dealers turn and disable players buttons
     if(game_.is_blackjack_player()) {
         dealer_turn();
     }
+    // If player goes over, disable players buttons
     else if(game_.is_player_over()) {
         switch_button_enabled(false, {"Hit", "Stay"});
     }
@@ -287,36 +308,92 @@ void MainWindow::on_hit_button_pressed() {
 void MainWindow::dealer_turn() {
     // Disable players buttons, initiate dealers turn and update UI
     switch_button_enabled(false, {"Hit", "Stay"});
-    game_.dealer_turn();
-    update_UI_cards(false);
+
+    // If no no cards left in deck, create a new deck
+    if(!game_.dealer_turn()){
+        game_.create_new_deck();
+        game_.dealer_turn();
+    }
+    update_UI_cards(false, false);
     update_UI_game_status();
 }
 
-void MainWindow::update_UI_cards(bool is_players_turn) {
-    display_dealer_cards(is_players_turn);
-    display_player_cards();
+void MainWindow::update_UI_cards(bool is_players_turn, bool is_round_over) {
+    // If round not over, move cards from deck to hand
+    if(!is_round_over) {
+        display_player_cards();
+        display_dealer_cards(is_players_turn);
+    }
+    // Else, move cards from hand to deck
+    else {
+        int dealer_hand_size = game_.get_dealer_hand().size();
+        int player_hand_size = game_.get_player_hand().size();
+        for (int i=0; i<dealer_hand_size; i++) {
+            animate_card_to_deck(dealer_card_holders_.at(i), used_deck_label_->pos());
+        }
+        for (int i=0; i<player_hand_size; i++) {
+            animate_card_to_deck(player_card_holders_.at(i), used_deck_label_->pos());
+        }
+    }
 }
 
-void MainWindow::animate_card(QLabel* card, const QPoint& endPos) {
+void MainWindow::animate_card_to_hand(QLabel* card, const QPoint& end_position) {
+    cards_left_-=1;
     // Configure the animation
     QEventLoop loop;
     QPropertyAnimation* animation = new QPropertyAnimation(card, "pos");
     animation->setDuration(1000);
-    animation->setStartValue(deck_holder_->pos());
-    animation->setEndValue(endPos);
+    animation->setStartValue(unused_deck_label_->pos());
+    animation->setEndValue(end_position);
     animation->setEasingCurve(QEasingCurve::OutCubic);
 
     // Ensure that function is not exited until the animation is over
-    QObject::connect(animation, &QPropertyAnimation::finished, animation, [&loop]() {
+    QObject::connect(animation, &QPropertyAnimation::finished, animation, [&loop, animation]() {
         loop.quit();
+        delete animation;
     });
 
-    // Start animation, crop the deck and disable buttons until animation is over
+    // Start animation, decrese the image of the unused deck of cards
+    // and disable buttons until animation is over
     animation->start();
     switch_button_enabled(false, {"Hit", "Stay"});
-    crop_deck_image();
+    decrease_deck_image();
     loop.exec();
+
+    // After animation, if deck is empty, animate deck shuffle
+    if(cards_left_==0) {
+        cards_left_ = NUM_CARDS_IN_DECK;
+        animate_deck_shuffle();
+        decrease_deck_image();
+    }
     switch_button_enabled(true, {"Hit", "Stay"});
+}
+
+void MainWindow::animate_card_to_deck(QLabel* card, const QPoint& end_position) {
+    // Configure the animation
+    QPoint start_value = card->pos();
+    QEventLoop loop;
+    QPropertyAnimation* animation = new QPropertyAnimation(card, "pos");
+    animation->setDuration(500);
+    animation->setStartValue(start_value);
+    animation->setEndValue(end_position);
+    animation->setEasingCurve(QEasingCurve::OutCubic);
+
+    // Ensure that function is not exited until the animation is over
+    QObject::connect(animation, &QPropertyAnimation::finished, animation, [&loop, animation]() {
+        loop.quit();
+        delete animation;
+    });
+
+    // Start animation, decrese the image of the unused deck of cards
+    // and disable buttons
+    animation->start();
+    switch_button_enabled(false, {"New round", "Withdraw"});
+    increase_deck_image();
+    loop.exec();
+
+    // Reset the positions of the cards for the next round
+    reset_card_position(card, start_value);
 }
 
 void MainWindow::display_dealer_cards(bool is_players_turn) {
@@ -325,13 +402,13 @@ void MainWindow::display_dealer_cards(bool is_players_turn) {
 
     for (const auto& dealer_card : dealer_hand) {
         // If over 9 cards have been dealt, stack the remaining ones on top of
-        // another, to avoid them going of screen
+        // another, to avoid cards going of screen
         if (i > NUM_CARD_HOLDERS - 2) {
             i = NUM_CARD_HOLDERS - 2;
         }
 
         // If it's the players turn, don't show dealers second card
-        if (is_players_turn && i == 1) {
+        if (is_players_turn and i == 1) {
             QString card_image_path = QString(":/cards/backside_6.png");
             QPixmap pixmap = load_pixmap_from_resource(card_image_path);
             dealer_card_holders_.at(i)->setPixmap(pixmap.scaled(dealer_card_holders_.at(0)->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
@@ -346,7 +423,7 @@ void MainWindow::display_dealer_cards(bool is_players_turn) {
 
         // Animate only the cards that have not been drawn
         if (!are_dealer_cards_animated_.at(i)) {
-            animate_card(dealer_card_holders_.at(i), dealer_card_holders_.at(i)->pos());
+            animate_card_to_hand(dealer_card_holders_.at(i), dealer_card_holders_.at(i)->pos());
             are_dealer_cards_animated_.at(i) = true;
         }
         i++;
@@ -371,7 +448,7 @@ void MainWindow::display_player_cards() {
 
         // Animate only the cards that have not been drawn
         if (!are_player_cards_animated_.at(i)) {
-            animate_card(player_card_holders_.at(i), player_card_holders_.at(i)->pos());
+            animate_card_to_hand(player_card_holders_.at(i), player_card_holders_.at(i)->pos());
             are_player_cards_animated_.at(i) = true;
         }
         i++;
@@ -430,7 +507,7 @@ void MainWindow::update_UI_player_won(int player_score, int dealer_score) {
         text += "Dealer score: " + QString::number(dealer_score) + "\n";
     }
     textbox1_->setText(text);
-    updates_after_round(false);
+    updates_after_round(true);
 }
 
 void MainWindow::update_UI_dealer_won(int player_score, int dealer_score) {
@@ -465,15 +542,18 @@ void MainWindow::update_UI_tie() {
     }
     // Make it possible to start a new round of blackjack
     switch_button_enabled(true, {"New round"});
+    switch_button_enabled(false, {"Hit", "Stay"});
 }
 
 void MainWindow::updates_after_round(bool player_won) {
+    switch_button_enabled(false, {"Hit", "Stay"});
+
     // Update account, database and statistics information
     if(player_won) {
-        account_.add_balance(bet_);
+        account_.add_balance();
     }
     else {
-        account_.decrease_balance(bet_);
+        account_.decrease_balance();
     }
 
     account_.empty_bet();
@@ -488,28 +568,54 @@ void MainWindow::updates_after_round(bool player_won) {
     switch_button_enabled(true, {"New round"});
 }
 
-void MainWindow::crop_deck_image() {
-    cards_left_ -=1;
+void MainWindow::decrease_deck_image() {
+    // If no cards left in deck, don't show the deck
     if(cards_left_==0) {
-        cards_left_ = 260;
+        // Set empty pixmap
+        QPixmap cropped_pixmap = QPixmap();
+        unused_deck_label_->setPixmap(cropped_pixmap.scaled(dealer_card_holders_.at(0)->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
     }
+    // Else, make the deck smaller on proportion on the cards left in deck
+    else {
+        // Define the initial height and the height to remove when only 1 card is left
+        int initial_height = unused_deck_pixmap_.height();
+        int height_to_remove_for_last_card = 580;
 
-    // Define the initial height and the height to remove when only 1 card is left
-    int initial_height = deck_pixmap_.height();
-    int height_to_remove_for_last_card = 580;
+        // Calculate the height to remove based on the number of cards remaining
+        int height_to_remove = height_to_remove_for_last_card * (NUM_CARDS_IN_DECK - cards_left_) / (NUM_CARDS_IN_DECK-1);
 
-    // Calculate the height to remove based on the number of cards remaining
-    int height_to_remove = height_to_remove_for_last_card * (260 - cards_left_) / 259;
+        // Calculate the new height of the cropped image
+        int new_height = initial_height - height_to_remove;
+
+        // Create a new QPixmap for the cropped image
+        QPixmap cropped_pixmap = unused_deck_pixmap_.copy(0, 0, unused_deck_pixmap_.width(), new_height);
+
+        // Set the new pixmap
+        unused_deck_label_->setPixmap(cropped_pixmap.scaled(dealer_card_holders_.at(0)->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    }
+}
+
+void MainWindow::increase_deck_image() {
+    QString card_image_path = QString(":/cards/backside_5.png");
+    used_deck_pixmap_ = load_pixmap_from_resource(card_image_path);
+
+    // Define the initial height and the height to add when increasing the deck size
+    int initial_height = unused_deck_pixmap_.height()-580;
+    int height_to_add_for_last_card = 580;
+
+    // Calculate the height to add based on the number of cards remaining
+    int height_to_add = height_to_add_for_last_card * (NUM_CARDS_IN_DECK - cards_left_) / (NUM_CARDS_IN_DECK-1);
 
     // Calculate the new height of the cropped image
-    int new_height = initial_height - height_to_remove;
+    int new_height = initial_height + height_to_add;
 
-    // Create a new QPixmap for the cropped image
-    QPixmap cropped_pixmap = deck_pixmap_.copy(0, 0, deck_pixmap_.width(), new_height);
+    // Create a new QPixmap for the expanded image
+    QPixmap expanded_pixmap = used_deck_pixmap_.copy(0, 0, unused_deck_pixmap_.width(), new_height);
 
     // Set the new pixmap
-    deck_holder_->setPixmap(cropped_pixmap.scaled(dealer_card_holders_.at(0)->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    used_deck_label_->setPixmap(expanded_pixmap.scaled(player_card_holders_.at(0)->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
+
 
 QPixmap MainWindow::load_pixmap_from_resource(const QString& file_path) {
     QPixmap pixmap;
@@ -535,15 +641,14 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     QMessageBox::StandardButton result = QMessageBox::question(
         this,
         "Confirmation",
-        "Are you sure you want to exit?\nYour current money left will be withdrawed.",
+        EXIT_MESSAGE,
         QMessageBox::Yes | QMessageBox::No
     );
 
     if (result == QMessageBox::Yes) {
         // If user has money on the account, withdraw it upon exit
         if(account_.get_balance()>0) {
-            int money_taken = account_.get_balance();
-            account_.withdraw_money(money_taken);
+            account_.withdraw_money();
         }
         event->accept();
     }
@@ -564,7 +669,50 @@ void MainWindow::switch_button_enabled(bool enable, std::vector<std::string> but
     }
 }
 
+void MainWindow::reset_card_position(QLabel* card, QPoint original_position) {
+    card->setPixmap(QPixmap());
+    card->move(original_position);
+}
+
+void MainWindow::animate_deck_shuffle() {
+    // Configure the animation
+    QPoint start_value = used_deck_label_->pos();
+    QEventLoop loop;
+    QPropertyAnimation* animation = new QPropertyAnimation(used_deck_label_, "pos");
+    animation->setDuration(5000);
+    animation->setStartValue(start_value);
+    animation->setEndValue(unused_deck_label_->pos());
+    animation->setEasingCurve(QEasingCurve::InOutQuad);
+
+    int amplitude = 50;
+    qreal key_value;
+
+    // Define the keyframes for the vibrating effect
+    for(int i=0; i<=20; i++) {
+        key_value = i*0.05;
+        if(i==0) {
+            animation->setKeyValueAt(i, start_value);
+        }
+        else {
+             animation->setKeyValueAt(key_value, start_value + QPoint(-amplitude, 0));
+             amplitude = -amplitude;
+        }
+    }
+    animation->setKeyValueAt(1, start_value);
+
+    // Ensure that function is not exited until the animation is over
+    QObject::connect(animation, &QPropertyAnimation::finished, animation, [&loop]() {
+        loop.quit();
+    });
+
+    // Start animation, after animation reset the card positions
+    animation->start();
+    loop.exec();
+    reset_card_position(used_deck_label_, start_value);
+}
+
 void MainWindow::play() {
+    textbox1_->setText(NEW_ROUND_INSTRUCTION);
     set_up_UI();
 }
 

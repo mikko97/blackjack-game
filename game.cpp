@@ -13,22 +13,24 @@ Game::~Game()
 
 void Game::new_round() {
     dealer_->empty_hand();
-    dealer_won_ = false;
-
     player_->empty_hand();
-    player_won_ = false; 
-
     tie_ = false;
     round_over_ = false;
-
-    initial_draw();
+    dealer_won_ = false;
+    player_won_ = false;
 }
 
-void Game::initial_draw() {
-    dealer_->initial_draw();
-    player_->initial_draw();
+bool Game::new_round_player() {
+    if(!player_->initial_draw()) {
+        return false;
+    }
+    return true;
+}
 
-    // Determine the winner if blackjacks occur after the initial draw of cards
+bool Game::new_round_dealer() {
+    if(!dealer_->initial_draw()) {
+        return false;
+    }
     if(is_blackjack_player() and is_blackjack_dealer()) {
         tie_ = true;
         round_over_ = true;
@@ -37,18 +39,25 @@ void Game::initial_draw() {
         player_won_ = true;
         round_over_ = true;
     }
+    return true;
 }
 
-void Game::dealer_turn() {
-    dealer_->make_move();
+bool Game::dealer_turn() {
+    if(!dealer_->make_move()) {
+        return false;
+    }
     determine_winner();
+    return true;
 }
 
-void Game::player_hit() {
-    player_->draw_new_card();
+bool Game::player_hit() {
+    if(!player_->draw_new_card()) {
+        return false;
+    }
     if(is_player_over()) {
         determine_winner();
     }
+    return true;
 }
 
 void Game::determine_winner() {
@@ -138,4 +147,9 @@ void Game::reset_game() {
 int Game::get_deck_size() {
     return deck_->get_deck_size();
 }
+
+void Game::create_new_deck() {
+    deck_->new_deck();
+}
+
 
