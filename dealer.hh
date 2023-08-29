@@ -1,7 +1,7 @@
 #ifndef DEALER_HH
 #define DEALER_HH
 
-#include <hand.hh>
+#include "hand.hh"
 
 #include <iostream>
 
@@ -50,14 +50,9 @@ public:
     int get_points() const;
 
     /**
-     * @brief Empty the hand
+     * @brief Empty the dealers hand
      */
     void empty_hand();
-
-    /**
-     * @brief Reset the deck
-     */
-    void reset_deck();
 
 private:
     std::unique_ptr<Hand> hand_;

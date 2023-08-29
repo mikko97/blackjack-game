@@ -1,7 +1,6 @@
 #include "card.hh"
 
-Card::Card(int value, int suit):
-    value_(value), suit_(suit)
+Card::Card(int value, int suit): value_(value), suit_(suit)
 {
 }
 

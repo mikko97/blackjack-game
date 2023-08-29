@@ -12,23 +12,20 @@ Hand::~Hand()
 
 bool Hand::initial_draw() {
     // Return false until both cards of the initial draw has been dealt
-    if(deck_.get_deck_size()==0) {
+    if(!draw_new_card()) {
         return false;
-    }
-    else if(deck_.get_deck_size()==1) {
-        draw_new_card();
-        return false;
-    }
-    // If hand size is 1, then the last card has been drawn from deck during
-    // the initial draw. Draw then 1 card more and return true, as now both
-    // of the 2 cards of the initial draw has been dealt
-    if(hand_.size()==1) {
-        draw_new_card();
-        return true;
     }
 
-    draw_new_card();
-    draw_new_card();
+    else if(deck_.get_deck_size()==0) {
+        return false;
+    }
+    /* If hand size is 1, then the last card has been drawn from deck during
+       the initial draw. Draw then 1 card more and return true, as now both
+       of the 2 cards of the initial draw has been dealt
+    */
+    if(hand_.size()==1) {
+        draw_new_card();
+    }
     return true;
 }
 
@@ -78,9 +75,10 @@ int Hand::calculate_secondary_points() const {
         }
     }
 
-    // If one ace is dealt and points are less than 21,
-    // then return the points where the value of the ace is 1
-    // These points will become the secondary points of the player
+    /* If one ace is dealt and points are less than 21,
+       then return the points where the value of the ace is 1
+       These points will become the secondary points of the player
+    */
     if (ace_count > 0 and total_points < BLACKJACK_THRESHOLD) {
         return total_points-(ACE_POINTS-1);
     }

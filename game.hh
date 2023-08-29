@@ -108,11 +108,6 @@ public:
     bool is_dealer_over();
 
     /**
-     * @brief Reset the game
-     */
-    void reset_game();
-
-    /**
      * @brief Get the number of cards left in the deck
      * @return The number of cards left
      */

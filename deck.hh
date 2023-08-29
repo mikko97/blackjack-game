@@ -1,7 +1,7 @@
 #ifndef DECK_HH
 #define DECK_HH
 
-#include <card.hh>
+#include "card.hh"
 
 #include <iostream>
 #include <vector>
@@ -55,6 +55,8 @@ public:
 private:
     static const int DECK_SIZE = 52;
     static const int NUMBER_OF_DECKS = 5;
+    static const int SUITS_PER_DECK = 4;
+    static const int CARDS_PER_SUIT = 13;
     std::vector<std::unique_ptr<Card>> deck_;
 };
 

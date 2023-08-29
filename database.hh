@@ -9,7 +9,6 @@
 #include <QPointF>
 #include <QDebug>
 
-
 class Database : public QObject {
     Q_OBJECT
 
@@ -22,11 +21,6 @@ public:
      * @return Bool value if the opening was a success
      */
     bool open_database();
-
-    /**
-     * @brief Close database
-     */
-    void close_database();
 
     /**
      * @brief Create the database tables
@@ -49,18 +43,6 @@ public:
      * @return Bool value if the adding of the record was a success
      */
     bool add_money_record(int user_id, int money_won);
-
-    /**
-     * @brief Fetch total games won per day
-     * @return Qmap, which has the day as key and the total rounds won as value
-     */
-    //QMap<QDateTime, int> fetch_total_wins_per_day();
-
-    /**
-     * @brief Fetch total games lost per day
-     * @return Qmap, which has the day as key and the total rounds lost as value
-     */
-    //QMap<QDateTime, int> fetch_total_losses_per_day();
 
     /**
      * @brief Fetch money won last week
@@ -100,6 +82,7 @@ public:
 
 private:
     QSqlDatabase m_db;
+    bool db_opened_succesfully_;
 };
 
 #endif // DATABASE_HH

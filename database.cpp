@@ -6,24 +6,23 @@ Database::Database(QObject *parent) : QObject(parent) {
 }
 
 Database::~Database() {
-    close_database();
+    m_db.close();
 }
 
 bool Database::open_database() {
     if (!m_db.open()) {
-        qDebug() << "Error opening database: " << m_db.lastError();
+        db_opened_succesfully_ = false;
         return false;
     }
-    qDebug() << "Database opened successfully!";
+    db_opened_succesfully_ = true;
     return true;
 }
 
-void Database::close_database() {
-    m_db.close();
-    qDebug() << "Database closed.";
-}
-
 bool Database::create_tables() {
+    if(!db_opened_succesfully_) {
+        throw std::runtime_error("Database is not open.");
+    }
+
     QSqlQuery query;
 
     QString create_table_query = "CREATE TABLE IF NOT EXISTS win_record ("
@@ -39,64 +38,73 @@ bool Database::create_tables() {
                               "date_time DATETIME DEFAULT CURRENT_TIMESTAMP);";
 
     if (!query.exec(create_table_query) or !query.exec(create_table_query2)) {
-        qDebug() << "Error creating table: " << query.lastError();
         return false;
     }
-    qDebug() << "Table created successfully!";
     return true;
 }
 
 bool Database::add_win_record(int user_id, bool round_won) {
+    if(!db_opened_succesfully_) {
+        throw std::runtime_error("Database is not open.");
+    }
+
     QSqlQuery query;
 
-    query.prepare("INSERT INTO win_record (user_id, round_won) VALUES (:user_id, :round_won)");
+    query.prepare("INSERT INTO win_record (user_id, round_won) VALUES "
+                  "(:user_id, :round_won)");
     query.bindValue(":user_id", user_id);
     query.bindValue(":round_won", round_won);
 
     if (!query.exec()) {
-        qDebug() << "Error adding win record: " << query.lastError();
-        return false;
+        throw std::runtime_error("Error updating game record to database."
+                                 "Do you want to ignore these messages in the future.");
     }
-
-    qDebug() << "Win record added successfully!";
     return true;
 }
 
 bool Database::add_money_record(int user_id, int money_won) {
+    if(!db_opened_succesfully_) {
+        throw std::runtime_error("Database is not open.");
+    }
+
     QSqlQuery query;
 
-    query.prepare("INSERT INTO money_record (user_id, money_won) VALUES (:user_id, :money_won)");
+    query.prepare("INSERT INTO money_record (user_id, money_won) VALUES "
+                  "(:user_id, :money_won)");
     query.bindValue(":user_id", user_id);
     query.bindValue(":money_won", money_won);
 
     if (!query.exec()) {
-        qDebug() << "Error adding money record: " << query.lastError();
-        return false;
+        throw std::runtime_error("Error updating game record to database."
+                                 "Do you want to ignore these messages in the future.");
     }
-
-    qDebug() << "Money record added successfully!";
     return true;
 }
 
 int Database::fetch_total_money_all_time() {
+    if(!db_opened_succesfully_) {
+        throw std::runtime_error("Database is not open.");
+    }
+
     int total_money = 0;
 
     QSqlQuery query;
     query.prepare("SELECT SUM(money_won) AS total_money FROM money_record");
 
     if (!query.exec()) {
-        qDebug() << "Error fetching total money all time: " << query.lastError();
-        return total_money; // Return 0 in case of an error
+        throw std::runtime_error("Error fetching money data");
     }
-
     if (query.next()) {
         total_money = query.value("total_money").toInt();
     }
-
     return total_money;
 }
 
 QMap<QDateTime, int> Database::fetch_money_won_last_week() {
+    if(!db_opened_succesfully_) {
+        throw std::runtime_error("Database is not open.");
+    }
+
     QMap<QDateTime, int> money_per_day;
 
     // Calculate the date 7 days ago from the current date
@@ -110,10 +118,8 @@ QMap<QDateTime, int> Database::fetch_money_won_last_week() {
     query.bindValue(":seven_days_ago", seven_days_ago);
 
     if (!query.exec()) {
-        qDebug() << "Error fetching total money for the last 7 days: " << query.lastError();
-        return money_per_day;
+        throw std::runtime_error("Error fetching money data");
     }
-
     while (query.next()) {
         QDateTime date_time = query.value("day").toDateTime();
         int money_won = query.value("money_won").toInt();
@@ -124,6 +130,10 @@ QMap<QDateTime, int> Database::fetch_money_won_last_week() {
 }
 
 QMap<QDateTime, int> Database::fetch_wins_last_week() {
+    if(!db_opened_succesfully_) {
+        throw std::runtime_error("Database is not open.");
+    }
+
     QMap<QDateTime, int> wins;
 
     // Calculate the date 7 days ago from the current date
@@ -136,20 +146,23 @@ QMap<QDateTime, int> Database::fetch_wins_last_week() {
                   "GROUP BY day");
     query.bindValue(":seven_days_ago", seven_days_ago);
 
-    if (query.exec()) {
-        while (query.next()) {
-            QDateTime date_time = query.value("day").toDateTime();
-            int rounds_won = query.value("rounds_won").toInt();
-            wins.insert(date_time, rounds_won);
-        }
-    } else {
-        qDebug() << "Error fetching wins in the last 7 days: " << query.lastError();
+    if (!query.exec()) {
+        throw std::runtime_error("Error fetching game data");
+    }
+    while (query.next()) {
+        QDateTime date_time = query.value("day").toDateTime();
+        int rounds_won = query.value("rounds_won").toInt();
+        wins.insert(date_time, rounds_won);
     }
 
     return wins;
 }
 
 QMap<QDateTime, int> Database::fetch_losses_last_week() {
+    if(!db_opened_succesfully_) {
+        throw std::runtime_error("Database is not open.");
+    }
+
     QMap<QDateTime, int> losses;
 
     // Calculate the date 7 days ago from the current date
@@ -162,45 +175,54 @@ QMap<QDateTime, int> Database::fetch_losses_last_week() {
                   "GROUP BY day");
     query.bindValue(":seven_days_ago", seven_days_ago);
 
-    if (query.exec()) {
-        while (query.next()) {
-            QDateTime date_time = query.value("day").toDateTime();
-            int rounds_lost = query.value("rounds_lost").toInt();
-            losses.insert(date_time, rounds_lost);
-        }
-    } else {
-        qDebug() << "Error fetching losses in the last 7 days: " << query.lastError();
+    if (!query.exec()) {
+        throw std::runtime_error("Error fetching game");
+    }
+    while (query.next()) {
+        QDateTime date_time = query.value("day").toDateTime();
+        int rounds_lost = query.value("rounds_lost").toInt();
+        losses.insert(date_time, rounds_lost);
     }
 
     return losses;
 }
 
 int Database::fetch_total_wins_all_time() {
+    if(!db_opened_succesfully_) {
+        throw std::runtime_error("Database is not open.");
+    }
+
     int total_wins = 0;
 
     QSqlQuery query;
-    query.prepare("SELECT COUNT(*) AS total_wins FROM win_record WHERE round_won = 1");
+    query.prepare("SELECT COUNT(*) AS total_wins FROM win_record"
+                  " WHERE round_won = 1");
 
-    if (query.exec() && query.next()) {
-        total_wins = query.value("total_wins").toInt();
-    } else {
-        qDebug() << "Error fetching total wins: " << query.lastError();
+    if (!query.exec() or !query.next()) {
+        throw std::runtime_error("Error fetching game data");
     }
-
+    else {
+        total_wins = query.value("total_wins").toInt();
+    }
     return total_wins;
 }
 
 int Database::fetch_total_losses_all_time() {
+    if(!db_opened_succesfully_) {
+        throw std::runtime_error("Database is not open.");
+    }
+
     int total_losses = 0;
 
     QSqlQuery query;
-    query.prepare("SELECT COUNT(*) AS total_losses FROM win_record WHERE round_won = 0");
+    query.prepare("SELECT COUNT(*) AS total_losses FROM win_record "
+                  "WHERE round_won = 0");
 
-    if (query.exec() && query.next()) {
-        total_losses = query.value("total_losses").toInt();
-    } else {
-        qDebug() << "Error fetching total losses: " << query.lastError();
+    if (!query.exec() or !query.next()) {
+        throw std::runtime_error("Error fetching game data");
     }
-
+    else {
+        total_losses = query.value("total_losses").toInt();
+    }
     return total_losses;
 }

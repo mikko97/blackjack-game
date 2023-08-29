@@ -1,7 +1,7 @@
 #ifndef PLAYER_HH
 #define PLAYER_HH
 
-#include <hand.hh>
+#include "hand.hh"
 
 class Player
 {

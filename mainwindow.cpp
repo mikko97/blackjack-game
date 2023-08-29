@@ -5,14 +5,14 @@ MainWindow::MainWindow(Database *db, QWidget *parent) :
     QMainWindow(parent),
     m_db(db),
     ui(new Ui::MainWindow),
-    account_(db),
+    account_(db, *this),
     statistics_window_(db)
 {
     // Set up fonts
-    QFont button_font1("Tahoma", 16, QFont::DemiBold);
-    QFont button_font2("Tahoma", 12, QFont::DemiBold);
-    QFont button_font3("Tahoma", 10, QFont::DemiBold);
-    QFont text_browser_font("Tahoma", 22);
+    QFont hit_stay_button_font("Tahoma", 16, QFont::DemiBold);
+    QFont new_round_stats_button_font("Tahoma", 12, QFont::DemiBold);
+    QFont withdraw_button_font("Tahoma", 10, QFont::DemiBold);
+    QFont text_browser_font("Tahoma", 20);
 
     // Set up the main widget
     QWidget* central_widget = new QWidget(this);
@@ -33,21 +33,21 @@ MainWindow::MainWindow(Database *db, QWidget *parent) :
     hit_button_->setObjectName("Hit");
     hit_button_->setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT);
     hit_button_->setStyleSheet("background-color: green");
-    hit_button_->setFont(button_font1);
+    hit_button_->setFont(hit_stay_button_font);
     buttons_.append(hit_button_);
 
     stay_button_ = new QPushButton("Stay", this);
     stay_button_->setObjectName("Stay");
     stay_button_->setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT);
     stay_button_->setStyleSheet("background-color: red");
-    stay_button_->setFont(button_font1);
+    stay_button_->setFont(hit_stay_button_font);
     buttons_.append(stay_button_);
 
     withdraw_money_button_ = new QPushButton("Withdraw money", this);
     withdraw_money_button_->setObjectName("Withdraw");
     withdraw_money_button_->setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT);
     withdraw_money_button_->setStyleSheet("background-color: yellow");
-    withdraw_money_button_->setFont(button_font3);
+    withdraw_money_button_->setFont(withdraw_button_font);
     buttons_.append(withdraw_money_button_);
 
     upper_button_layout->addWidget(hit_button_);
@@ -63,18 +63,17 @@ MainWindow::MainWindow(Database *db, QWidget *parent) :
     new_round_button_->setObjectName("New round");
     new_round_button_->setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT);
     new_round_button_->setStyleSheet("background-color: white");
-    new_round_button_->setFont(button_font2);
+    new_round_button_->setFont(new_round_stats_button_font);
     buttons_.append(new_round_button_);
 
     statistics_button_ = new QPushButton("Stats", this);
     statistics_button_->setObjectName("Stats");
     statistics_button_->setFixedSize(BUTTON_WIDTH, BUTTON_HEIGHT);
     statistics_button_->setStyleSheet("background-color: white");
-    statistics_button_->setFont(button_font2);
+    statistics_button_->setFont(new_round_stats_button_font);
     buttons_.append(statistics_button_);
 
     lower_button_layout->addWidget(new_round_button_);
-    //button_layout2->addWidget(reset_button_);
     lower_button_layout->addWidget(statistics_button_);
     lower_button_layout->addStretch(1);
 
@@ -82,15 +81,17 @@ MainWindow::MainWindow(Database *db, QWidget *parent) :
     QVBoxLayout* text_box_layout = new QVBoxLayout;
 
     // Create the textboxes
-    textbox1_ = new QTextBrowser();
-    textbox1_->setStyleSheet("padding: 22px; color: white; border-style: dashed; border-width: 8px; border-color: white");
-    textbox1_->setFont(text_browser_font);
-    text_box_layout->addWidget(textbox1_);
+    game_status_textbox = new QTextBrowser();
+    game_status_textbox->setStyleSheet("padding: 22px; color: white; border-style: "
+                             "dashed; border-width: 8px; border-color: white");
+    game_status_textbox->setFont(text_browser_font);
+    text_box_layout->addWidget(game_status_textbox);
 
-    textbox2_ = new QTextBrowser();
-    textbox2_->setStyleSheet("padding: 22px; color: white; border-style: dashed; border-width: 8px; border-color: white");
-    textbox2_->setFont(text_browser_font);
-    text_box_layout->addWidget(textbox2_);
+    money_status_textbox = new QTextBrowser();
+    money_status_textbox->setStyleSheet("padding: 22px; color: white; border-style: "
+                             "dashed; border-width: 8px; border-color: white");
+    money_status_textbox->setFont(text_browser_font);
+    text_box_layout->addWidget(money_status_textbox);
 
     // Add the groups of card labels to the main layout
     main_layout->addLayout(dealer_layout);
@@ -121,7 +122,6 @@ MainWindow::MainWindow(Database *db, QWidget *parent) :
     connect(hit_button_, &QPushButton::clicked, this, &MainWindow::on_hit_button_pressed);
     connect(stay_button_, &QPushButton::clicked, this, &MainWindow::dealer_turn);
     connect(new_round_button_, &QPushButton::clicked, this, &MainWindow::on_new_round_button_pressed);
-    //connect(reset_button_, &QPushButton::clicked, this, &MainWindow::reset_game);
     connect(withdraw_money_button_, &QPushButton::clicked, this, &MainWindow::on_withdraw_button_pressed);
     connect(statistics_button_, &QPushButton::clicked, this, &MainWindow::on_statistics_button_pressed);
 
@@ -152,11 +152,13 @@ QHBoxLayout *MainWindow::create_card_labels(bool is_players_cards) {
         if(i==NUM_CARD_HOLDERS - 1) {
             if(is_players_cards) {
                 used_deck_label_ = label;
-                used_deck_label_->setPixmap(used_deck_pixmap_.scaled(player_card_holders_.at(0)->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+                used_deck_label_->setPixmap(used_deck_pixmap_.scaled(player_card_holders_.at(0)->size(),
+                                            Qt::KeepAspectRatio, Qt::SmoothTransformation));
             }
             else {
                 unused_deck_label_ = label;
-                unused_deck_label_->setPixmap(unused_deck_pixmap_.scaled(dealer_card_holders_.at(0)->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+                unused_deck_label_->setPixmap(unused_deck_pixmap_.scaled(dealer_card_holders_.at(0)->size(),
+                                              Qt::KeepAspectRatio, Qt::SmoothTransformation));
             }
         }
 
@@ -196,18 +198,22 @@ void MainWindow::on_withdraw_button_pressed() {
     switch_button_enabled(false, {"Withdraw"});
     int money_taken = account_.get_balance();
     account_.withdraw_money();
-    statistics_window_.load_money_data();
+    statistics_window_.load_money_data_from_db();
 
     QString text = "You withdraw " + QString::number(money_taken) + "$\n";
     text += "Your balance: 0$";
-    textbox2_->setText(text);
+    money_status_textbox->setText(text);
 }
 
 void MainWindow::place_bet() {
     // Ask player for their bet and place the bet
+    QString bet_message = "Place your bet\n\nMin bet: ";
+    bet_message+=QString::number(1)+="$\nMax bet: ";
     int max_bet = account_.get_balance();
+    bet_message+=QString::number(max_bet)+="$";
+
     bool ok;
-    int bet = QInputDialog::getInt(nullptr, "Bet", PLACE_BET, 1, 1, max_bet, 1, &ok);
+    int bet = QInputDialog::getInt(nullptr, "Bet", bet_message, 1, 1, max_bet, 1, &ok);
 
     // Ask again for the player to set the bet, if they close the dialog
     if(!ok) {
@@ -227,7 +233,7 @@ void MainWindow::update_UI_balance() {
     if(account_.is_bet_placed()) {
         text += "\nYour bet: " + QString::number(bet) + "$";
     }
-    textbox2_->setText(text);
+    money_status_textbox->setText(text);
 }
 
 void MainWindow::on_new_round_button_pressed() {
@@ -244,7 +250,7 @@ void MainWindow::on_new_round_button_pressed() {
 
     place_bet();
     game_.new_round();
-    textbox1_->setText("");
+    game_status_textbox->clear();
 
     if(!game_.new_round_player()) {
         game_.create_new_deck();
@@ -338,7 +344,10 @@ void MainWindow::update_UI_cards(bool is_players_turn, bool is_round_over) {
 }
 
 void MainWindow::animate_card_to_hand(QLabel* card, const QPoint& end_position) {
+    // Update cards_left_ for decreasing the used deck image and
+    // increasing the unused deck image
     cards_left_-=1;
+
     // Configure the animation
     QEventLoop loop;
     QPropertyAnimation* animation = new QPropertyAnimation(card, "pos");
@@ -411,14 +420,16 @@ void MainWindow::display_dealer_cards(bool is_players_turn) {
         if (is_players_turn and i == 1) {
             QString card_image_path = QString(":/cards/backside_6.png");
             QPixmap pixmap = load_pixmap_from_resource(card_image_path);
-            dealer_card_holders_.at(i)->setPixmap(pixmap.scaled(dealer_card_holders_.at(0)->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            dealer_card_holders_.at(i)->setPixmap(pixmap.scaled(dealer_card_holders_.at(0)->size(),
+                                                  Qt::KeepAspectRatio, Qt::SmoothTransformation));
         }
         else {
             int suit_number = dealer_card->get_suit();
             int value_number = dealer_card->get_value();
             QString card_image_path = QString(":/cards/%1_%2.png").arg(value_number).arg(suit_number);
             QPixmap pixmap = load_pixmap_from_resource(card_image_path);
-            dealer_card_holders_.at(i)->setPixmap(pixmap.scaled(dealer_card_holders_.at(0)->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            dealer_card_holders_.at(i)->setPixmap(pixmap.scaled(dealer_card_holders_.at(0)->size(),
+                                                  Qt::KeepAspectRatio, Qt::SmoothTransformation));
         }
 
         // Animate only the cards that have not been drawn
@@ -444,7 +455,8 @@ void MainWindow::display_player_cards() {
         int value_number = player_card->get_value();
         QString card_image_path = QString(":/cards/%1_%2.png").arg(value_number).arg(suit_number);
         QPixmap pixmap(card_image_path);
-        player_card_holders_.at(i)->setPixmap(pixmap.scaled(player_card_holders_.at(0)->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        player_card_holders_.at(i)->setPixmap(pixmap.scaled(player_card_holders_.at(0)->size(),
+                                              Qt::KeepAspectRatio, Qt::SmoothTransformation));
 
         // Animate only the cards that have not been drawn
         if (!are_player_cards_animated_.at(i)) {
@@ -479,7 +491,7 @@ void MainWindow::update_UI_game_status() {
 
     // Update money related statistics if all money is spent
     if(account_.get_balance()==0) {
-        statistics_window_.load_money_data();
+        statistics_window_.load_money_data_from_db();
     }
 }
 
@@ -490,7 +502,7 @@ void MainWindow::update_UI_ongoing(int player_score, int player_secondary_score)
         text += " or " + QString::number(player_secondary_score);
     }
     text += GAME_INSTRUCTION;
-    textbox1_->setText(text);
+    game_status_textbox->setText(text);
 }
 
 void MainWindow::update_UI_player_won(int player_score, int dealer_score) {
@@ -506,7 +518,7 @@ void MainWindow::update_UI_player_won(int player_score, int dealer_score) {
         text += "Your score: " + QString::number(player_score) + "\n";
         text += "Dealer score: " + QString::number(dealer_score) + "\n";
     }
-    textbox1_->setText(text);
+    game_status_textbox->setText(text);
     updates_after_round(true);
 }
 
@@ -527,13 +539,13 @@ void MainWindow::update_UI_dealer_won(int player_score, int dealer_score) {
         text += "Your score: " + QString::number(player_score) + "\n";
         text += "Dealer score: " + QString::number(dealer_score) + "\n";
     }
-    textbox1_->setText(text);
+    game_status_textbox->setText(text);
     updates_after_round(false);
 }
 
 void MainWindow::update_UI_tie() {
     // Display tie message and take the bet of
-    textbox1_->setText(GAME_IS_TIE);
+    game_status_textbox->setText(GAME_IS_TIE);
     account_.empty_bet();
 
     // Make withdraw possible only if money left
@@ -557,8 +569,13 @@ void MainWindow::updates_after_round(bool player_won) {
     }
 
     account_.empty_bet();
-    m_db->add_win_record(1,player_won);
-    statistics_window_.load_game_data();
+    try {
+        m_db->add_win_record(1,player_won);
+    }
+    catch (const std::exception& e) {
+        emit db_error_occurred(e.what());
+    }
+    statistics_window_.load_game_data_from_db();
 
     // Make withdraw possible only if money left
     if(account_.get_balance()>0) {
@@ -573,7 +590,8 @@ void MainWindow::decrease_deck_image() {
     if(cards_left_==0) {
         // Set empty pixmap
         QPixmap cropped_pixmap = QPixmap();
-        unused_deck_label_->setPixmap(cropped_pixmap.scaled(dealer_card_holders_.at(0)->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        unused_deck_label_->setPixmap(cropped_pixmap.scaled(dealer_card_holders_.at(0)->size(),
+                                      Qt::KeepAspectRatio, Qt::SmoothTransformation));
     }
     // Else, make the deck smaller on proportion on the cards left in deck
     else {
@@ -591,7 +609,8 @@ void MainWindow::decrease_deck_image() {
         QPixmap cropped_pixmap = unused_deck_pixmap_.copy(0, 0, unused_deck_pixmap_.width(), new_height);
 
         // Set the new pixmap
-        unused_deck_label_->setPixmap(cropped_pixmap.scaled(dealer_card_holders_.at(0)->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        unused_deck_label_->setPixmap(cropped_pixmap.scaled(dealer_card_holders_.at(0)->size(),
+                                      Qt::KeepAspectRatio, Qt::SmoothTransformation));
     }
 }
 
@@ -613,7 +632,8 @@ void MainWindow::increase_deck_image() {
     QPixmap expanded_pixmap = used_deck_pixmap_.copy(0, 0, unused_deck_pixmap_.width(), new_height);
 
     // Set the new pixmap
-    used_deck_label_->setPixmap(expanded_pixmap.scaled(player_card_holders_.at(0)->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    used_deck_label_->setPixmap(expanded_pixmap.scaled(player_card_holders_.at(0)->size(),
+                                Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 
@@ -621,12 +641,10 @@ QPixmap MainWindow::load_pixmap_from_resource(const QString& file_path) {
     QPixmap pixmap;
     QFile file(file_path);
     if (!file.exists()) {
-        qDebug() << "Image file not found: " << file_path;
-        return pixmap; // Return an empty pixmap if the file doesn't exist
+        return pixmap; // Return an empty pixmap if the image couldn't be loaded
     }
 
     if (!pixmap.load(file_path)) {
-        qDebug() << "Failed to load image from file: " << file_path;
         return pixmap; // Return an empty pixmap if the image couldn't be loaded
     }
 
@@ -635,6 +653,34 @@ QPixmap MainWindow::load_pixmap_from_resource(const QString& file_path) {
 
 void MainWindow::on_statistics_button_pressed() {
     statistics_window_.show();
+}
+
+void MainWindow::display_db_initialization_error_dialogue(QString error_message) {
+    QMessageBox::StandardButton result = QMessageBox::question(
+        this,
+        "Confirmation",
+        error_message,
+        QMessageBox::Yes | QMessageBox::No
+    );
+
+    if (result == QMessageBox::No) {
+        exit(1);
+    }
+}
+
+void MainWindow::display_db_add_error_dialogue(QString error_message) {
+    if(show_error_messages_) {
+        QMessageBox::StandardButton result = QMessageBox::question(
+            this,
+            "Confirmation",
+            error_message,
+            QMessageBox::Yes | QMessageBox::No
+        );
+
+        if (result == QMessageBox::Yes) {
+            show_error_messages_ = false;
+        }
+    }
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -712,7 +758,7 @@ void MainWindow::animate_deck_shuffle() {
 }
 
 void MainWindow::play() {
-    textbox1_->setText(NEW_ROUND_INSTRUCTION);
+    game_status_textbox->setText(NEW_ROUND_INSTRUCTION);
     set_up_UI();
 }
 

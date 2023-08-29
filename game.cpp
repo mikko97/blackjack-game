@@ -138,12 +138,6 @@ bool Game::is_dealer_over() {
     return false;
 }
 
-void Game::reset_game() {
-    deck_ = std::make_unique<Deck>();
-    player_ = std::make_unique<Player>(*deck_);
-    dealer_ = std::make_unique<Dealer>(*deck_);
-}
-
 int Game::get_deck_size() {
     return deck_->get_deck_size();
 }

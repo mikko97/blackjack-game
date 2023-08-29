@@ -18,14 +18,8 @@
 #include <QDebug>
 #include <QPixmap>
 #include <QFontDatabase>
-#include <QApplication>
 #include <QInputDialog>
 #include <QMessageBox>
-#include <QProgressBar>
-#include <QTimer>
-#include <thread>
-#include <chrono>
-#include <QGraphicsDropShadowEffect>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -38,6 +32,22 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(Database *db, QWidget *parent = nullptr);
     ~MainWindow();
+
+public slots:
+    /**
+     * @brief Display a dialogue if error has happened
+     * @param error_message - Message to be displayed in the dialogue
+     */
+    void display_db_initialization_error_dialogue(QString error_message);
+
+    /**
+     * @brief Display a dialogue if error has happened
+     * @param error_message - Message to be displayed in the dialogue
+     */
+    void display_db_add_error_dialogue(QString error_message);
+
+signals:
+    void db_error_occurred(QString error_message);
 
 protected:
     /**
@@ -53,11 +63,6 @@ private slots:
      *        to start the new round of blackjack.
      */
     void on_new_round_button_pressed();
-
-    /**
-     * @brief Start a new game.
-     */
-    //void reset_game();
 
     /**
      * @brief Handles the event when the "Hit" button is pressed
@@ -217,29 +222,40 @@ private:
     Database *m_db;
     Ui::MainWindow *ui;
 
+    // Buttons and textboxes
     QVector<QPushButton*> buttons_;
     QPushButton* hit_button_;
     QPushButton* stay_button_;
     QPushButton* new_round_button_;
     QPushButton* statistics_button_;
     QPushButton* withdraw_money_button_;
-    QTextBrowser* textbox1_;
-    QTextBrowser* textbox2_;
+    QTextBrowser* game_status_textbox;
+    QTextBrowser* money_status_textbox;
 
+    // Deck labels and their pixmaps
     QLabel* used_deck_label_;
     QLabel* unused_deck_label_;
     QPixmap used_deck_pixmap_;
     QPixmap unused_deck_pixmap_;
 
+    // Card labels and their positions
     QVector<QLabel*> dealer_card_holders_;
     QVector<QPoint> dealer_card_positions_;
-    std::vector<bool> are_dealer_cards_animated_;
     QVector<QLabel*> player_card_holders_;
     QVector<QPoint> player_card_positions_;
+
+    // Vectors to check if cards have been animated
+    std::vector<bool> are_dealer_cards_animated_;
     std::vector<bool> are_player_cards_animated_;
 
+    /* Use this to calculate deck image size instead of getting the deck size
+       through game class.
+    */
     int cards_left_ = NUM_CARDS_IN_DECK;
 
+    bool show_error_messages_ = true;
+
+    // Constant ints
     static const int NUM_CARDS_IN_DECK = 260;
     static const int NUM_CARD_HOLDERS = 10;
     static const int CARD_HOLDER_WIDTH = 200;
@@ -247,7 +263,10 @@ private:
     static const int BUTTON_WIDTH = 200;
     static const int BUTTON_HEIGHT = 100;
     static const int BLACKJACK_THRESHOLD = 21;
+    static const int NUM_PIXELS_TO_TAKE = 21;
 
+
+    // Constant messages
     inline static const QString GAME_INSTRUCTION = "\n\nPress 'Hit' to draw new card\nPress 'Stay' to stay";
     inline static const QString NEW_ROUND_INSTRUCTION = "Press the 'New round'-button to start the game";
     inline static const QString PLAYER_WON = "You won!\n";
@@ -258,8 +277,8 @@ private:
     inline static const QString DEALER_WENT_BUST = "Dealer went bust!";
     inline static const QString BOTH_GOT_BLACKJACK = "You both got blackjack!\n";
     inline static const QString GAME_IS_TIE = "It's a tie!\nYou both got blackjack!";
-    inline static const QString ACCOUNT_DEPOSIT = "Enter money to your account";
-    inline static const QString PLACE_BET = "Place your bet";
+    inline static const QString ACCOUNT_DEPOSIT = "Enter money to your account\n\nMin deposit: 10$\nMax deposit: 100$";
+    inline static const QString PLACE_BET = "Place your bet ";
     inline static const QString EXIT_MESSAGE = "Are you sure you want to exit?\nYour current money left will be withdrawed.";
 
     Game game_;

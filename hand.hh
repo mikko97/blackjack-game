@@ -1,7 +1,8 @@
 #ifndef HAND_HH
 #define HAND_HH
 
-#include <deck.hh>
+#include "deck.hh"
+
 #include <iostream>
 #include <vector>
 #include <memory>

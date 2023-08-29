@@ -1,5 +1,5 @@
 #include "deck.hh"
-#include <QDebug>
+
 Deck::Deck()
 {
     new_deck();
@@ -9,8 +9,8 @@ void Deck::new_deck() {
     // Create the predetermined amount of decks and shuffle them
     deck_.clear();
     for(int i=1; i<=NUMBER_OF_DECKS; i++) {
-        for (int suit = 1; suit <= 4; suit++) {
-            for (int value = 1; value <= 13; value++) {
+        for (int suit = 1; suit <= SUITS_PER_DECK; suit++) {
+            for (int value = 1; value <= CARDS_PER_SUIT; value++) {
                 deck_.push_back(std::make_unique<Card>(value, suit));
             }
         }
@@ -30,10 +30,6 @@ void Deck::shuffle() {
 }
 
 std::unique_ptr<Card> Deck::draw_card() {
-    if (deck_.empty()) {
-        new_deck();
-    }
-
     std::unique_ptr<Card> card = std::move(deck_.back());
     deck_.pop_back();
     return card;

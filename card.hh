@@ -9,8 +9,8 @@ public:
 
     /**
      * @brief Card constructor
-     * @param value - value of the card
-     * @param suit - suit of the card
+     * @param value - value of the card (1-13)
+     * @param suit - suit of the card (1-4, where 1=Clubs, 2=Spades, 3=Clubs, 4=Hearts)
      */
     Card(int value, int suit);
 
