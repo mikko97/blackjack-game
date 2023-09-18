@@ -1,4 +1,4 @@
-#include "database.hh"
+#include "headers/database.hh"
 
 Database::Database(QObject *parent) : QObject(parent) {
     m_db = QSqlDatabase::addDatabase("QSQLITE");

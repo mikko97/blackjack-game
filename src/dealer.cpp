@@ -1,4 +1,4 @@
-#include "dealer.hh"
+#include "headers/dealer.hh"
 
 Dealer::Dealer(Deck& deck) : hand_(std::make_unique<Hand>(deck))
 {

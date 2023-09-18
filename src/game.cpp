@@ -1,4 +1,4 @@
-#include "game.hh"
+#include "headers/game.hh"
 
 Game::Game() :
     deck_(std::make_unique<Deck>()),

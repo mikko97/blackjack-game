@@ -1,5 +1,5 @@
-#include "account.hh"
-#include "mainwindow.hh"
+#include "headers/mainwindow.hh"
+#include "headers/account.hh"
 
 Account::Account(Database *db, MainWindow& mainWindow):
     m_db(db), main_window(mainWindow)

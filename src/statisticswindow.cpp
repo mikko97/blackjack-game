@@ -1,4 +1,4 @@
-#include "statisticswindow.hh"
+#include "headers/statisticswindow.hh"
 #include "ui_statisticswindow.h"
 
 StatisticsWindow::StatisticsWindow(Database *db, QWidget *parent) :

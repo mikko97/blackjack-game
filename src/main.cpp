@@ -1,5 +1,5 @@
-#include "mainwindow.hh"
-#include "database.hh"
+#include "headers/mainwindow.hh"
+#include "headers/database.hh"
 
 #include <QApplication>
 #include <QDebug>

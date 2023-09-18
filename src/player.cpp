@@ -1,4 +1,4 @@
-#include "player.hh"
+#include "headers/player.hh"
 
 Player::Player(Deck& deck) : hand_(std::make_unique<Hand>(deck))
 {

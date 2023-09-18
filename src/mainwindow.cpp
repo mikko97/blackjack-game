@@ -1,4 +1,4 @@
-#include "mainwindow.hh"
+#include "headers/mainwindow.hh"
 #include "qeventloop.h"
 #include "ui_mainwindow.h"
 

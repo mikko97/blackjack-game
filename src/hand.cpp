@@ -1,4 +1,4 @@
-#include "hand.hh"
+#include "headers/hand.hh"
 #include <QDebug>
 
 Hand::Hand(Deck& deck):

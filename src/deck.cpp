@@ -1,4 +1,4 @@
-#include "deck.hh"
+#include "headers/deck.hh"
 
 Deck::Deck()
 {

@@ -1,4 +1,4 @@
-#include "card.hh"
+#include "headers/card.hh"
 
 Card::Card(int value, int suit): value_(value), suit_(suit)
 {
