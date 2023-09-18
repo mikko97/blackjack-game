@@ -8,34 +8,35 @@ CONFIG += c++17
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+
 SOURCES += \
-    account.cpp \
-    card.cpp \
-    database.cpp \
-    dealer.cpp \
-    deck.cpp \
-    game.cpp \
-    hand.cpp \
-    main.cpp \
-    mainwindow.cpp \
-    player.cpp \
-    statisticswindow.cpp
+    src/account.cpp \
+    src/card.cpp \
+    src/database.cpp \
+    src/dealer.cpp \
+    src/deck.cpp \
+    src/game.cpp \
+    src/hand.cpp \
+    src/main.cpp \
+    src/mainwindow.cpp \
+    src/player.cpp \
+    src/statisticswindow.cpp
 
 HEADERS += \
-    account.hh \
-    card.hh \
-    database.hh \
-    dealer.hh \
-    deck.hh \
-    game.hh \
-    hand.hh \
-    mainwindow.hh \
-    player.hh \
-    statisticswindow.hh
+    headers/account.hh \
+    headers/card.hh \
+    headers/database.hh \
+    headers/dealer.hh \
+    headers/deck.hh \
+    headers/game.hh \
+    headers/hand.hh \
+    headers/mainwindow.hh \
+    headers/player.hh \
+    headers/statisticswindow.hh
 
 FORMS += \
-    mainwindow.ui \
-    statisticswindow.ui
+    forms/mainwindow.ui \
+    forms/statisticswindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -43,4 +44,4 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 RESOURCES += \
-    resources.qrc
+    resources/resources.qrc
