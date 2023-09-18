@@ -1,1 +1,54 @@
-# blackjack-game
+# Blackjack Game with GUI in C++ (Qt Creator)
+
+## Table of Contents
+- [Introduction](#introduction)
+- [Features](#features)
+- [Installation](#installation)
+- [License](#license)
+
+## Introduction
+Welcome to the Blackjack Game with a graphical user interface (GUI) developed in C++ using Qt Creator. This project allows you to play the classic casino card game of Blackjack in a user-friendly environment.
+
+## Features
+- User-friendly graphical user interface (GUI).
+- Classic rules of Blackjack implemented.
+- Ability to bet using play money.
+- Card drawing and shuffling animations.
+- Statistics on wins/losses/money won/money lost.
+
+## Installation
+If you just want to play the game, you can download it from the releases section.
+
+Alternatively, follow these steps to clone and set up the Blackjack game project on your local device:
+
+
+1. **Clone the Repository:**
+
+   Clone this repository to your local device using Git:
+   ```bash
+   git clone https://github.com/mikko97/blackjack-game.git
+
+3. **Open the Project:**
+  - Launch Qt Creator.
+  - Open the cloned project directory by selecting "File" > "Open File or Project" and selecting the .pro project file.
+
+3. **Build the Project:**
+  - Build the project by clicking the build button in Qt Creator.
+    
+  - Alternatively, you can build the project in terminal:
+    
+    1. **Navigate to the project directory**
+       ```bash
+       
+       cd your/path/blackjack-game
+       
+    2. **Generate makefiles:**
+       ```bash
+       qmake
+       
+    3. **Build the project:**
+       ```bash
+       make
+       
+## License
+- This project is licensed under the MIT License. 
