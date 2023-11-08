@@ -125,7 +125,7 @@ void StatisticsWindow::load_money_data_to_charts(QMap<QDateTime, int> money_per_
     QtCharts::QBarSet *set_money_lost = new QtCharts::QBarSet("Money lost");
 
     // Insert data to the sets
-    for (const QDateTime day : money_per_day.keys()) {
+    for (const QDateTime& day : money_per_day.keys()) {
         int total_money_day = money_per_day.value(day);
         if(total_money_day>0) {
             *set_money_won << total_money_day;
@@ -133,6 +133,10 @@ void StatisticsWindow::load_money_data_to_charts(QMap<QDateTime, int> money_per_
         }
         else if(total_money_day<0) {
             *set_money_lost << -total_money_day;
+            *set_money_won << 0;
+        }
+        else {
+            *set_money_lost << 0;
             *set_money_won << 0;
         }
         categories_money_.append(day.toString("dd MMM yyyy"));
@@ -158,45 +162,11 @@ void StatisticsWindow::load_game_data_to_charts(QMap<QDateTime, int> wins_per_da
     QtCharts::QBarSet *set_won = new QtCharts::QBarSet("Rounds won");
     QtCharts::QBarSet *set_lost = new QtCharts::QBarSet("Rounds lost");
 
-    /* There might be different amount of data in wins_per_day and
-       losses_per_day. The charts need to be configured based on the
-       list which has the most days of data
-    */
-    QMap<QDateTime, int> map_with_fewer_days;
-    QMap<QDateTime, int> map_with_more_days;
-
-    if (wins_per_day.count() < losses_per_day.count()) {
-        map_with_fewer_days = wins_per_day;
-        map_with_more_days = losses_per_day;
-    }
-
-    else if(wins_per_day.count() > losses_per_day.count()){
-        map_with_fewer_days = losses_per_day;
-        map_with_more_days = wins_per_day;
-    }
-
-    else {
-        map_with_more_days = wins_per_day;
-    }
-
     // Insert data to the sets
-    for (const QDateTime day : map_with_more_days.keys()) {
+    for (const QDateTime& day : wins_per_day.keys()) {
         categories_games_.append(day.toString("dd MMM yyyy"));
-        if(wins_per_day.contains(day)) {
-            int rounds_won_day = wins_per_day.value(day);
-            *set_won << rounds_won_day;
-        }
-        else {
-            *set_won << 0;
-        }
-
-        if(losses_per_day.contains(day)) {
-            int rounds_lost_day = losses_per_day.value(day);
-            *set_lost << rounds_lost_day;
-        }
-        else {
-            *set_lost << 0;
-        }
+        *set_won << wins_per_day.value(day);
+        *set_lost << losses_per_day.value(day);
     }
 
     set_won->setColor(Qt::green);

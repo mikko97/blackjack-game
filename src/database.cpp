@@ -126,6 +126,14 @@ QMap<QDateTime, int> Database::fetch_money_won_last_week() {
         money_per_day.insert(date_time, money_won);
     }
 
+    // Populate map with zeros, if no data from a day
+    for(int i=7; i>=0; i--) {
+        QDateTime day = QDateTime::currentDateTime().addDays(-i);
+        if (money_per_day.find(day) == money_per_day.end()) {
+            money_per_day.insert(day, 0);
+        }
+    }
+
     return money_per_day;
 }
 
@@ -155,6 +163,14 @@ QMap<QDateTime, int> Database::fetch_wins_last_week() {
         wins.insert(date_time, rounds_won);
     }
 
+    // Populate map with zeros, if no data from a day
+    for(int i=7; i>=0; i--) {
+        QDateTime day = QDateTime::currentDateTime().addDays(-i);
+        if (wins.find(day) == wins.end()) {
+            wins.insert(day, 0);
+        }
+    }
+
     return wins;
 }
 
@@ -182,6 +198,14 @@ QMap<QDateTime, int> Database::fetch_losses_last_week() {
         QDateTime date_time = query.value("day").toDateTime();
         int rounds_lost = query.value("rounds_lost").toInt();
         losses.insert(date_time, rounds_lost);
+    }
+
+    // Populate map with zeros, if no data from a day
+    for(int i=7; i>=0; i--) {
+        QDateTime day = QDateTime::currentDateTime().addDays(-i);
+        if (losses.find(day) == losses.end()) {
+            losses.insert(day, 0);
+        }
     }
 
     return losses;
@@ -226,4 +250,3 @@ int Database::fetch_total_losses_all_time() {
     }
     return total_losses;
 }
-
