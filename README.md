@@ -1,5 +1,5 @@
 # Blackjack Game with GUI in C++ (Qt Creator)
-https://github.com/mikko97/blackjack-game/assets/139375905/21fea236-0d99-4bba-b7cf-aa69261c2f32
+https://github.com/mikko97/blackjack-game/assets/139375905/aa042dfc-0874-4091-94a2-6382109f7e53
 
 ## Table of Contents
 - [Introduction](#introduction)
