@@ -94,7 +94,7 @@ StatisticsWindow::StatisticsWindow(Database *db, QWidget *parent) :
 
 void StatisticsWindow::load_money_data_from_db() {
     try {
-        QMap<QDateTime, int> money_per_day = m_db->fetch_money_won_last_week();
+        QMap<std::string, int> money_per_day = m_db->fetch_money_won_last_week();
         int total_money = m_db->fetch_total_money_all_time();
         load_money_data_to_charts(money_per_day, total_money);
     }
@@ -105,8 +105,8 @@ void StatisticsWindow::load_money_data_from_db() {
 
 void StatisticsWindow::load_game_data_from_db() {
     try {
-        QMap<QDateTime, int> wins_per_day = m_db->fetch_wins_last_week();
-        QMap<QDateTime, int> losses_per_day = m_db->fetch_losses_last_week();
+        QMap<std::string, int> wins_per_day = m_db->fetch_wins_last_week();
+        QMap<std::string, int> losses_per_day = m_db->fetch_losses_last_week();
         int wins_all_time = m_db->fetch_total_wins_all_time();
         int losses_all_time = m_db->fetch_total_losses_all_time();
         load_game_data_to_charts(wins_per_day, losses_per_day, wins_all_time,
@@ -117,7 +117,7 @@ void StatisticsWindow::load_game_data_from_db() {
     }
 }
 
-void StatisticsWindow::load_money_data_to_charts(QMap<QDateTime, int> money_per_day, int total_money) {
+void StatisticsWindow::load_money_data_to_charts(QMap<std::string, int> money_per_day, int total_money) {
     categories_money_.clear();
     bar_series_money_->clear();
 
@@ -125,7 +125,8 @@ void StatisticsWindow::load_money_data_to_charts(QMap<QDateTime, int> money_per_
     QtCharts::QBarSet *set_money_lost = new QtCharts::QBarSet("Money lost");
 
     // Insert data to the sets
-    for (const QDateTime& day : money_per_day.keys()) {
+    for (const std::string& day : money_per_day.keys()) {
+        QString day_qstring = QString::fromStdString(day);
         int total_money_day = money_per_day.value(day);
         if(total_money_day>0) {
             *set_money_won << total_money_day;
@@ -139,7 +140,7 @@ void StatisticsWindow::load_money_data_to_charts(QMap<QDateTime, int> money_per_
             *set_money_lost << 0;
             *set_money_won << 0;
         }
-        categories_money_.append(day.toString("dd MMM yyyy"));
+        categories_money_.append(day_qstring);
     }
     set_money_won->setColor(Qt::green);
     set_money_lost->setColor(Qt::red);
@@ -152,8 +153,8 @@ void StatisticsWindow::load_money_data_to_charts(QMap<QDateTime, int> money_per_
                                 .arg(total_money)+"$");
 }
 
-void StatisticsWindow::load_game_data_to_charts(QMap<QDateTime, int> wins_per_day,
-                                                QMap<QDateTime, int> losses_per_day,
+void StatisticsWindow::load_game_data_to_charts(QMap<std::string, int> wins_per_day,
+                                                QMap<std::string, int> losses_per_day,
                                                 int wins_all_time,
                                                 int losses_all_time) {
     categories_games_.clear();
@@ -163,8 +164,9 @@ void StatisticsWindow::load_game_data_to_charts(QMap<QDateTime, int> wins_per_da
     QtCharts::QBarSet *set_lost = new QtCharts::QBarSet("Rounds lost");
 
     // Insert data to the sets
-    for (const QDateTime& day : wins_per_day.keys()) {
-        categories_games_.append(day.toString("dd MMM yyyy"));
+    for (const std::string& day : wins_per_day.keys()) {
+        QString day_qstring = QString::fromStdString(day);
+        categories_games_.append(day_qstring);
         *set_won << wins_per_day.value(day);
         *set_lost << losses_per_day.value(day);
     }
@@ -180,7 +182,3 @@ void StatisticsWindow::load_game_data_to_charts(QMap<QDateTime, int> wins_per_da
                                          " %1\n\nRounds lost all time: %2")
                                  .arg(wins_all_time).arg(losses_all_time));
 }
-
-
-
-

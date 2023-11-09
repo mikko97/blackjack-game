@@ -48,7 +48,7 @@ public:
      * @brief Fetch money won last week
      * @return Qmap, which has the day as key and the money won as value
      */
-    QMap<QDateTime, int> fetch_money_won_last_week();
+    QMap<std::string, int> fetch_money_won_last_week();
 
     /**
      * @brief Fetch total money won all time
@@ -60,13 +60,13 @@ public:
      * @brief Fetch total wins last week
      * @return Qmap, which has the day as key and the rounds won as value
      */
-    QMap<QDateTime, int> fetch_wins_last_week();
+    QMap<std::string, int> fetch_wins_last_week();
 
     /**
      * @brief Fetch total losses last week
      * @return Qmap, which has the day as key and the rounds lost as value
      */
-    QMap<QDateTime, int> fetch_losses_last_week();
+    QMap<std::string, int> fetch_losses_last_week();
 
     /**
      * @brief Fetch total rounds won all time

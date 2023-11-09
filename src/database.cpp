@@ -100,12 +100,12 @@ int Database::fetch_total_money_all_time() {
     return total_money;
 }
 
-QMap<QDateTime, int> Database::fetch_money_won_last_week() {
+QMap<std::string, int> Database::fetch_money_won_last_week() {
     if(!db_opened_succesfully_) {
         throw std::runtime_error("Database is not open.");
     }
 
-    QMap<QDateTime, int> money_per_day;
+    QMap<std::string, int> money_per_day;
 
     // Calculate the date 7 days ago from the current date
     QDateTime seven_days_ago = QDateTime::currentDateTime().addDays(-7);
@@ -122,14 +122,15 @@ QMap<QDateTime, int> Database::fetch_money_won_last_week() {
     }
     while (query.next()) {
         QDateTime date_time = query.value("day").toDateTime();
+        std::string date_time_string = date_time.toString("yyyy-MM-dd").toStdString();
         int money_won = query.value("money_won").toInt();
-        money_per_day.insert(date_time, money_won);
+        money_per_day.insert(date_time_string, money_won);
     }
 
     // Populate map with zeros, if no data from a day
-    for(int i=7; i>=0; i--) {
-        QDateTime day = QDateTime::currentDateTime().addDays(-i);
-        if (money_per_day.find(day) == money_per_day.end()) {
+    for (int i = 7; i >= 0; i--) {
+        std::string day = QDateTime::currentDateTime().addDays(-i).toString("yyyy-MM-dd").toStdString();
+        if (!money_per_day.keys().contains(day)) {
             money_per_day.insert(day, 0);
         }
     }
@@ -137,12 +138,12 @@ QMap<QDateTime, int> Database::fetch_money_won_last_week() {
     return money_per_day;
 }
 
-QMap<QDateTime, int> Database::fetch_wins_last_week() {
+QMap<std::string, int> Database::fetch_wins_last_week() {
     if(!db_opened_succesfully_) {
         throw std::runtime_error("Database is not open.");
     }
 
-    QMap<QDateTime, int> wins;
+    QMap<std::string, int> wins;
 
     // Calculate the date 7 days ago from the current date
     QDateTime seven_days_ago = QDateTime::currentDateTime().addDays(-7);
@@ -159,14 +160,15 @@ QMap<QDateTime, int> Database::fetch_wins_last_week() {
     }
     while (query.next()) {
         QDateTime date_time = query.value("day").toDateTime();
+        std::string date_time_string = date_time.toString("yyyy-MM-dd").toStdString();
         int rounds_won = query.value("rounds_won").toInt();
-        wins.insert(date_time, rounds_won);
+        wins.insert(date_time_string, rounds_won);
     }
 
     // Populate map with zeros, if no data from a day
-    for(int i=7; i>=0; i--) {
-        QDateTime day = QDateTime::currentDateTime().addDays(-i);
-        if (wins.find(day) == wins.end()) {
+    for (int i = 7; i >= 0; i--) {
+        std::string day = QDateTime::currentDateTime().addDays(-i).toString("yyyy-MM-dd").toStdString();
+        if (!wins.keys().contains(day)) {
             wins.insert(day, 0);
         }
     }
@@ -174,12 +176,14 @@ QMap<QDateTime, int> Database::fetch_wins_last_week() {
     return wins;
 }
 
-QMap<QDateTime, int> Database::fetch_losses_last_week() {
+#include <iostream>
+QMap<std::string, int> Database::fetch_losses_last_week() {
     if(!db_opened_succesfully_) {
         throw std::runtime_error("Database is not open.");
     }
 
-    QMap<QDateTime, int> losses;
+    //QMap<QDateTime, int> losses;
+    QMap<std::string, int> losses;
 
     // Calculate the date 7 days ago from the current date
     QDateTime seven_days_ago = QDateTime::currentDateTime().addDays(-7);
@@ -196,14 +200,15 @@ QMap<QDateTime, int> Database::fetch_losses_last_week() {
     }
     while (query.next()) {
         QDateTime date_time = query.value("day").toDateTime();
+        std::string date_time_string = date_time.toString("yyyy-MM-dd").toStdString();
         int rounds_lost = query.value("rounds_lost").toInt();
-        losses.insert(date_time, rounds_lost);
+        losses.insert(date_time_string, rounds_lost);
     }
 
     // Populate map with zeros, if no data from a day
-    for(int i=7; i>=0; i--) {
-        QDateTime day = QDateTime::currentDateTime().addDays(-i);
-        if (losses.find(day) == losses.end()) {
+    for (int i = 7; i >= 0; i--) {
+        std::string day = QDateTime::currentDateTime().addDays(-i).toString("yyyy-MM-dd").toStdString();
+        if (!losses.keys().contains(day)) {
             losses.insert(day, 0);
         }
     }

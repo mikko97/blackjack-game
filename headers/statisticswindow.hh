@@ -31,7 +31,7 @@ public:
     /**
      * @brief Load the data related to users money to the charts
      */
-    void load_money_data_to_charts(QMap<QDateTime, int> money_per_day,
+    void load_money_data_to_charts(QMap<std::string, int> money_per_day,
                                    int total_money);
 
     /**
@@ -42,8 +42,8 @@ public:
     /**
      * @brief Load the data related to users games to the charts
      */
-    void load_game_data_to_charts(QMap<QDateTime, int> wins_per_day,
-                                  QMap<QDateTime, int> losses_per_day,
+    void load_game_data_to_charts(QMap<std::string, int> wins_per_day,
+                                  QMap<std::string, int> losses_per_day,
                                   int wins_all_time,
                                   int losses_all_time);
 
