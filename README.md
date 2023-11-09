@@ -11,11 +11,12 @@ https://github.com/mikko97/blackjack-game/assets/139375905/21fea236-0d99-4bba-b7
 This is a Blackjack game developed with C++ using Qt Creator. This project allows you to play the classic casino card game of Blackjack in a user-friendly environment. This project was done to get more familiar with C++.
 
 ## Features
-- Graphical user interface.
-- Classic rules of Blackjack implemented.
-- Ability to bet using play money.
-- Card drawing and shuffling animations.
-- Statistics on wins/losses/money won/money lost.
+- Graphical user interface
+- Classic rules of Blackjack
+- Ability to bet using play money
+- Card drawing and shuffling animations
+- Statistics on wins/losses/money won/money lost
+- Database for saving and fetching users statistics
 
 ## Installation
 If you just want to play the game, you can download it from the releases section.
