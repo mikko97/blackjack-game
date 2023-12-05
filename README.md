@@ -1,3 +1,4 @@
+[![C++ CI with Qt](https://github.com/mikko97/blackjack-game/actions/workflows/main.yml/badge.svg)](https://github.com/mikko97/blackjack-game/actions/workflows/main.yml)
 # Blackjack Game with GUI in C++ (Qt Creator)
 https://github.com/mikko97/blackjack-game/assets/139375905/aa042dfc-0874-4091-94a2-6382109f7e53
 
