@@ -1,0 +1,32 @@
+name: C++ CI with Qt
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+  - cron: "0 20 * * 1-5"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Qt
+      uses: qt-actions/setup-qt@v3
+      with:
+        qt-version: '5.15.2'
+
+    - name: Configure and Build
+      run: |
+        qmake blackjack-game.pro
+        make
+
+    - name: Run Tests
+      run: make check
