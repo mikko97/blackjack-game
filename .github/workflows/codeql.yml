@@ -25,10 +25,6 @@ jobs:
         dir: '${{ github.workspace }}/qt-installation/'
         modules: 'qtcharts'
 
-    - name: Print Qt installation directory
-      run: |
-        ls -R "${{ github.workspace }}/qt-installation/"
-
     - name: Add Qt bin directory to PATH
       run: echo "${{ github.workspace }}/qt-installation/5.15.2/gcc_64/bin" >> $GITHUB_PATH
 
@@ -45,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout repository
       uses: actions/checkout@v3
 
     - name: Initialize CodeQL
@@ -53,9 +49,12 @@ jobs:
       with:
         languages: 'cpp'
 
-    - name: Build CodeQL database
+    - name: Build code
       run: |
-        codeql database create --language=cpp --source-root . --command='qmake blackjack-game.pro && make'
+        qmake blackjack-game.pro
+        make
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
+      with:
+        languages: 'cpp'
