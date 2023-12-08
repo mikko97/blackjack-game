@@ -18,11 +18,19 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Download and extract Qt tools
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: '5.15.2'
+        dir: '${{ github.workspace }}/qt-installation/'
+        modules: 'qtcharts'
+
+    - name: Print Qt installation directory
       run: |
-        mkdir -p $HOME/qt
-        curl -L https://download.qt.io/archive/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.tar.xz | tar -xJ -C $HOME/qt
-        export PATH=$HOME/qt/qt-everywhere-src-5.15.2/gcc_64/bin:$PATH
+        ls -R "${{ github.workspace }}/qt-installation/"
+
+    - name: Add Qt bin directory to PATH
+      run: echo "${{ github.workspace }}/qt-installation/5.15.2/gcc_64/bin" >> $GITHUB_PATH
 
     - name: Configure and Build
       run: |
@@ -45,8 +53,9 @@ jobs:
       with:
         languages: 'cpp'
 
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v2
+    - name: Build CodeQL database
+      run: |
+        codeql database create --language=cpp --source-root . --command='qmake blackjack-game.pro && make'
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
