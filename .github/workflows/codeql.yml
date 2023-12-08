@@ -25,6 +25,9 @@ jobs:
         dir: '${{ github.workspace }}/qt-installation/'
         modules: 'qtcharts'
 
+    - name: Add Qt bin directory to PATH
+      run: echo "${{ github.workspace }}/qt-installation/5.15.2/gcc_64/bin" >> $GITHUB_PATH
+
     - name: Configure and Build
       run: |
         qmake blackjack-game.pro
@@ -46,10 +49,8 @@ jobs:
       with:
         languages: 'cpp'
 
-    - name: Configure and Build
-      run: |
-        qmake blackjack-game.pro
-        make
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v2
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
