@@ -54,8 +54,10 @@ jobs:
         echo "${{ github.workspace }}/qt-installation/5.15.2/gcc_64/bin" >> $GITHUB_PATH
         export PATH="${{ github.workspace }}/qt-installation/5.15.2/gcc_64/bin:$PATH"
 
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v2
+    - name: Custom Build
+      run: |
+        qmake blackjack-game.pro
+        make
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
