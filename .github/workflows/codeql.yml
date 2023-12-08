@@ -18,15 +18,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: '5.15.2'
-        dir: '${{ github.workspace }}/qt-installation/'
-        modules: 'qtcharts'
-
-    - name: Add Qt bin directory to PATH
-      run: echo "${{ github.workspace }}/qt-installation/5.15.2/gcc_64/bin" >> $GITHUB_PATH
+    - name: Download and extract Qt tools
+      run: |
+        mkdir -p $HOME/qt
+        curl -L https://download.qt.io/archive/qt/5.15/5.15.2/single/qt-everywhere-src-5.15.2.tar.xz | tar -xJ -C $HOME/qt
+        export PATH=$HOME/qt/qt-everywhere-src-5.15.2/gcc_64/bin:$PATH
 
     - name: Configure and Build
       run: |
