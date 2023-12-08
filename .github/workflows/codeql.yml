@@ -46,8 +46,10 @@ jobs:
       with:
         languages: 'cpp'
 
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v2
+    - name: Configure and Build
+      run: |
+        qmake blackjack-game.pro
+        make
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
